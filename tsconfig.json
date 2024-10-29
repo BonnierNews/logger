@@ -1,0 +1,11 @@
+{
+  "extends": "@bonniernews/tsconfig",
+  "compilerOptions": {
+    "rootDir": "./",
+    "outDir": "./dist",
+    "declaration": true,
+    "esModuleInterop": true,
+    "types": ["node", "mocha", "chai"]
+  },
+  "include": ["lib", "@types", "index.ts", "test"]
+}
