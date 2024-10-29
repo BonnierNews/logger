@@ -1,0 +1,45 @@
+{
+  "name": "@bonniernews/logger",
+  "version": "0.0.1",
+  "description": "Some simple functions to use Trace Context for correlating logs",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint .",
+    "format": "prettier --write . && eslint --fix .",
+    "typecheck": "tsc --noEmit",
+    "test": "mocha --exit --reporter ${REPORTER:-spec}",
+    "coverage": "c8 npm test && c8 check-coverage",
+    "local-coverage": "c8 --reporter html npm test && c8 check-coverage || open ./coverage/index.html",
+    "prepublish": "npm run build"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@bonniernews/tsconfig": "^0.0.2",
+    "@types/chai": "^5.0.0",
+    "@types/eslint__js": "^8.42.3",
+    "@types/express": "^5.0.0",
+    "@types/mocha": "^10.0.8",
+    "@types/node": "^22.7.3",
+    "@types/sinon": "^17.0.3",
+    "c8": "^10.1.2",
+    "chai": "^5.1.1",
+    "eslint": "^9.13.0",
+    "express": "^4.21.0",
+    "mocha": "^10.7.3",
+    "mocha-cakes-2": "^3.3.0",
+    "pino": "^9.4.0",
+    "pino-test": "^1.1.0",
+    "prettier": "^3.3.3",
+    "sinon": "^19.0.2",
+    "tsx": "^4.19.1",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.12.1"
+  },
+  "optionalDependencies": {
+    "gcp-metadata": "^6.1.0"
+  }
+}
