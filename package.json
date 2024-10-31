@@ -1,10 +1,13 @@
 {
   "name": "@bonniernews/logger",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Some simple functions to use Trace Context for correlating logs",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "lint": "eslint .",
