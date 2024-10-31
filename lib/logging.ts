@@ -29,6 +29,7 @@ export function getLoggingTraceData() {
 type BnLoggerOptions = Omit<LoggerOptions, "level"> & {
   logLevel?: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
   formatLog?: NonNullable<LoggerOptions["formatters"]>["log"];
+  fetchGcpProjectId?: boolean;
 };
 
 export function logger(options: BnLoggerOptions = {}) {
@@ -54,8 +55,11 @@ export function logger(options: BnLoggerOptions = {}) {
         }
       : undefined,
     mixin,
+    fetchGcpProjectId = true,
     ...rest
   } = options;
+
+  if (fetchGcpProjectId) getGcpProjectId();
 
   return pino({
     level,
