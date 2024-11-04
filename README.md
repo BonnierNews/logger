@@ -2,6 +2,9 @@
 
 Bonnier News logger library, that makes it easier to unify logging. It is pre-configured for GCP and includes tracing capabilities for Express servers.
 
+[![npm version](https://badge.fury.io/js/@bonniernews%2Flogger.svg)](https://www.npmjs.com/package/@bonniernews/logger)
+![build status](https://github.com/BonnierNews/logger/actions/workflows/ci.yml/badge.svg)
+
 ```sh
 npm install @bonniernews/logger
 ```
@@ -12,7 +15,6 @@ Here is an example server with log tracing enabled.
 
 ```js
 import {
-  fetchGcpProjectId,
   getHttpTraceHeader,
   middleware,
   logger as BNLogger
@@ -23,11 +25,7 @@ import pino from "pino";
 const logger = BNLogger();
 const app = express();
 
-app.use(middleware);
-
-// Fetches the project ID from the GCP metadata server in the background on startup.
-// This is only necessary if you don't set the `GCP_PROJECT` environment variable.
-fetchGcpProjectId();
+app.use(middleware());
 
 app.get("/", async (req, res) => {
   logger.info("Hello, world!");
@@ -91,3 +89,8 @@ log.error({ err: error }, "This message takes precedence over err.message");
 #### Tracing
 
 If you want to decorate logs with tracing fields for incoming requests, use the library's `middleware`, which will use Node async hooks to store and decorate all logs using the [standardized](https://www.w3.org/TR/trace-context/) `traceparent` header.
+
+### Configuration
+
+The middleware will automatically fetch the GCP project ID from the [metadata server](https://cloud.google.com/compute/docs/metadata/overview),
+but if it's unavailable (or if you wish to avoid the network call), you can set the `GCP_PROJECT_ID` environment variable.
