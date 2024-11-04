@@ -24,6 +24,9 @@
   },
   "author": "",
   "license": "MIT",
+  "dependencies": {
+    "gcp-metadata": "^6.1.0"
+  },
   "devDependencies": {
     "@bonniernews/tsconfig": "^0.0.2",
     "@types/chai": "^5.0.0",
@@ -45,8 +48,5 @@
     "tsx": "^4.19.1",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.12.1"
-  },
-  "optionalDependencies": {
-    "gcp-metadata": "^6.1.0"
   }
 }
