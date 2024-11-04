@@ -1,34 +1,27 @@
-let gcpProjectId: string | undefined = undefined;
+import gcpMetaData from "gcp-metadata";
+
+// undefined - uninitialized, null - not available, string - project ID
+let gcpProjectId: string | null | undefined = undefined;
 
 export function getGcpProjectId() {
-  return process.env.GCP_PROJECT || gcpProjectId;
+  return gcpProjectId;
 }
 
-/**
- * Fetches the Google Cloud Platform (GCP) project ID from the GCP metadata server.
- *
- * You only need to call this function if you're not setting the `GCP_PROJECT` environment variable.
- */
-export async function fetchGcpProjectId() {
-  let gcpMetaData;
-  /* c8 ignore start */
-  try {
-    gcpMetaData = await import("gcp-metadata");
-  } catch {
-    console.error("Failed to import gcp-metadata module");
-    return;
+export async function init() {
+  if (gcpProjectId === undefined) {
+    gcpProjectId = process.env.GCP_PROJECT ?? (await fetchGcpProjectIdFromMetadataServer());
   }
-  /* c8 ignore stop */
+}
 
+async function fetchGcpProjectIdFromMetadataServer() {
   const isAvailable = await gcpMetaData.isAvailable();
-  if (!isAvailable) return;
-
-  gcpProjectId = await gcpMetaData.project("project-id");
+  if (!isAvailable) return null;
+  return (await gcpMetaData.project("project-id")) as string;
 }
 
 /**
  * Resets the GCP project ID, for testing.
  */
-export async function reset() {
+export function reset() {
   gcpProjectId = undefined;
 }

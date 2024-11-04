@@ -13,7 +13,6 @@ export function getLoggingTraceData() {
 
   const gcpProjectId = getGcpProjectId();
   if (!gcpProjectId) {
-    console.log("GCP Project ID not found");
     return logData;
   }
 
