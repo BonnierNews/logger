@@ -1,26 +1,23 @@
 import pino, { DestinationStream, LoggerOptions } from "pino";
-import { getGcpProjectId } from "./gcp";
 import { getStore } from "./middleware";
-import { getTraceFromTraceparent } from "./traceparent";
 
-export function getLoggingTraceData() {
-  const { traceparent, ...rest } = getStore();
-  if (!traceparent) return rest;
+function getLoggingData() {
+  const store = getStore();
+  return store ? store.logFields : {};
+}
 
-  const trace = getTraceFromTraceparent(traceparent);
-  if (!trace) return rest;
+/**
+ * Add any additional log data to the request context. To use this feature, you must enable the
+ * request storage by initializing the built-in middleware.
+ */
+export function decorateLogs(obj: Record<string, unknown>) {
+  const store = getStore();
 
-  const logData = { traceId: trace.traceId, spanId: trace.parentId, ...rest };
+  if (!store) throw new Error("@bonniernews/logger middleware has not been initialized");
 
-  const gcpProjectId = getGcpProjectId();
-  if (!gcpProjectId) return logData;
-
-  return {
-    ...logData,
-    "logging.googleapis.com/trace": `projects/${gcpProjectId}/traces/${trace.traceId}`,
-    "logging.googleapis.com/spanId": trace.parentId,
-    "logging.googleapis.com/trace_sampled": trace.isSampled,
-  };
+  for (const key in obj) {
+    store.logFields[key] = obj[key];
+  }
 }
 
 type BnLoggerOptions = Omit<LoggerOptions, "level" | "formatters"> & {
@@ -68,7 +65,7 @@ export function logger(options: BnLoggerOptions = {}, stream?: DestinationStream
         ...(formatLog && { log: formatLog }),
       },
       transport,
-      mixin: (...args) => ({ ...getLoggingTraceData(), ...mixin?.(...args) }),
+      mixin: (...args) => ({ ...getLoggingData(), ...mixin?.(...args) }),
       ...rest,
     },
     stream

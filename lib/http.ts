@@ -1,7 +1,6 @@
 import { getStore } from "./middleware";
 
 export function getHttpTraceHeader() {
-  const { traceparent } = getStore();
-  if (traceparent) return { traceparent };
-  return {};
+  const { traceparent } = getStore() || {};
+  return traceparent ? { traceparent } : {};
 }
