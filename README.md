@@ -18,7 +18,6 @@ import {
   logger as BNLogger
 } from "@bonniernews/logger";
 import express from "express";
-import pino from "pino";
 
 const logger = BNLogger();
 const app = express();
