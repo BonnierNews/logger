@@ -30,23 +30,22 @@
     "pino-pretty": "^11.3.0"
   },
   "devDependencies": {
+    "@bonniernews/eslint-config": "^1.2.0",
     "@bonniernews/tsconfig": "^0.0.2",
     "@types/chai": "^5.0.0",
-    "@types/eslint__js": "^8.42.3",
     "@types/express": "^5.0.0",
     "@types/mocha": "^10.0.8",
     "@types/node": "^22.7.3",
     "@types/sinon": "^17.0.3",
     "c8": "^10.1.2",
     "chai": "^5.1.1",
-    "eslint": "^9.13.0",
+    "eslint": "^8.57.1",
     "express": "^4.21.0",
     "mocha": "^10.7.3",
     "mocha-cakes-2": "^3.3.0",
     "prettier": "^3.3.3",
     "sinon": "^19.0.2",
     "tsx": "^4.19.1",
-    "typescript": "^5.6.3",
-    "typescript-eslint": "^8.12.1"
+    "typescript": "^5.6.3"
   }
 }
