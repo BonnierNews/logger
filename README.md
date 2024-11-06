@@ -22,7 +22,7 @@ import express from "express";
 const logger = BNLogger();
 const app = express();
 
-app.use(middleware);
+app.use(middleware());
 
 // Fetches the project ID from the GCP metadata server in the background on startup.
 // This is only necessary if you don't set the `GCP_PROJECT` environment variable.

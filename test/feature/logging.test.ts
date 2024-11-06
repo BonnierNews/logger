@@ -33,7 +33,7 @@ Feature("Logging with tracing", () => {
 
     When("logging in the middleware context", () => {
       // @ts-expect-error - We don't need the full Express Request object
-      middleware({ header: () => traceparent }, {}, () => {
+      middleware()({ headers: { traceparent } }, {}, () => {
         logger.info("test");
       });
     });
@@ -60,7 +60,7 @@ Feature("Logging with tracing", () => {
 
     When("logging in the middleware context", () => {
       // @ts-expect-error - We don't need the full Express Request object
-      middleware({ header: () => "" }, {}, () => {
+      middleware()({ headers: {} }, {}, () => {
         logger.info("test");
       });
     });
@@ -87,7 +87,7 @@ Feature("Logging with tracing", () => {
 
     When("logging in the middleware context", () => {
       // @ts-expect-error - We don't need the full Express Request object
-      middleware({ header: () => "foo" }, {}, () => {
+      middleware()({ headers: {} }, {}, () => {
         logger.info("test");
       });
     });
@@ -131,7 +131,7 @@ Feature("Logging with tracing", () => {
 
     When("logging in the middleware context", () => {
       // @ts-expect-error - We don't need the full Express Request object
-      middleware({ header: () => traceparent }, {}, () => {
+      middleware()({ headers: { traceparent } }, {}, () => {
         logger.info("test");
       });
     });
@@ -146,6 +146,38 @@ Feature("Logging with tracing", () => {
         "logging.googleapis.com/spanId",
         "logging.googleapis.com/trace_sampled",
       ]);
+    });
+  });
+
+  Scenario("Logging in the middleware context, with extra data from request", () => {
+    Given("we can fetch the GCP project ID from the metadata server", async () => {
+      sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
+      sandbox.stub(gcpMetaData, "project").resolves("test-project");
+      await fetchGcpProjectId();
+    });
+
+    When("logging in the middleware context", () => {
+      middleware({ extractRequestData: (req) => ({ foo: req.headers.foo }) })(
+        // @ts-expect-error - We don't need the full Express Request object
+        { headers: { traceparent, foo: "bar", dontIncludeMe: "baz" } },
+        {},
+        () => {
+          logger.info("test");
+        }
+      );
+    });
+
+    Then("trace and extracted data should be logged", () => {
+      expect(logs.length).to.equal(1);
+      expect(logs[0]).to.deep.include({
+        message: "test",
+        traceId,
+        spanId,
+        foo: "bar",
+        "logging.googleapis.com/trace": `projects/test-project/traces/${traceId}`,
+        "logging.googleapis.com/spanId": spanId,
+        "logging.googleapis.com/trace_sampled": true,
+      });
     });
   });
 });
@@ -224,7 +256,7 @@ Feature("Logging options", () => {
 
     When("logging in the middleware context", () => {
       // @ts-expect-error - We don't need the full Express Request object
-      middleware({ header: () => traceparent }, {}, () => {
+      middleware()({ headers: { traceparent } }, {}, () => {
         localLogger.info("test");
       });
     });

@@ -6,7 +6,7 @@ describe("HTTP helper", () => {
     const traceparent = "00-abcdef0123456789abcdef0123456789-abcdef0123456789-01";
 
     // @ts-expect-error - We don't need the full Express Request object
-    middleware({ header: () => traceparent }, {}, () => {
+    middleware()({ headers: { traceparent } }, {}, () => {
       expect(getHttpTraceHeader()).to.deep.equal({ traceparent });
     });
   });
