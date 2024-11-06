@@ -3,7 +3,6 @@ import { AsyncLocalStorage } from "node:async_hooks";
 
 type Store = {
   traceparent?: string;
-  clientServiceAccount?: string;
   [key: string]: unknown;
 };
 
