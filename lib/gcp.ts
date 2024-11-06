@@ -1,6 +1,7 @@
 import gcpMetaData from "gcp-metadata";
 
-let gcpProjectId: string | undefined = undefined;
+// undefined - uninitialized, null - not available, string - project ID
+let gcpProjectId: string | undefined;
 
 export function getGcpProjectId() {
   return process.env.GCP_PROJECT || gcpProjectId;

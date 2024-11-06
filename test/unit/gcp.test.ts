@@ -1,5 +1,6 @@
 import gcpMetaData from "gcp-metadata";
 import { createSandbox } from "sinon";
+
 import { fetchGcpProjectId, getGcpProjectId } from "../../lib/gcp";
 
 const sandbox = createSandbox();
@@ -24,7 +25,7 @@ describe("GCP log fields", () => {
     expect(getGcpProjectId()).to.equal("test-project");
   });
 
-  it("should use the environment variable if provided", async () => {
+  it("should use the environment variable if provided", () => {
     const oldGcpProject = process.env.GCP_PROJECT;
     process.env.GCP_PROJECT = "test-project-env";
 

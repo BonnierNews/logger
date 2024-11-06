@@ -1,14 +1,15 @@
 import gcpMetaData from "gcp-metadata";
 import pino from "pino";
 import { createSandbox } from "sinon";
+
 import { fetchGcpProjectId, reset } from "../../lib/gcp";
-import { logger as BNLogger } from "../../lib/logging";
+import { logger as buildLogger } from "../../lib/logging";
 import { middleware } from "../../lib/middleware";
 
 const logs: Record<string, unknown>[] = [];
 const stream = { write: (data: string) => logs.push(JSON.parse(data)) };
 
-const logger = BNLogger({}, stream);
+const logger = buildLogger({}, stream);
 
 const sandbox = createSandbox();
 
@@ -193,7 +194,7 @@ Feature("Logging options", () => {
   Scenario("Logging with custom mixin", () => {
     let localLogger: pino.Logger;
     Given("a logger with a custom mixin", () => {
-      localLogger = BNLogger({ mixin: () => ({ foo: "bar" }) }, stream);
+      localLogger = buildLogger({ mixin: () => ({ foo: "bar" }) }, stream);
     });
 
     When("logging", () => {
@@ -212,7 +213,7 @@ Feature("Logging options", () => {
   Scenario("Logging with custom mixin and trace context", () => {
     let localLogger: pino.Logger;
     Given("a logger with a custom mixin", () => {
-      localLogger = BNLogger({ mixin: () => ({ foo: "bar" }) }, stream);
+      localLogger = buildLogger({ mixin: () => ({ foo: "bar" }) }, stream);
     });
 
     And("we can fetch the GCP project ID from the metadata server", async () => {
@@ -245,10 +246,10 @@ Feature("Logging options", () => {
   Scenario("Logging with `formatLog`", () => {
     let localLogger: pino.Logger;
     Given("a logger with a custom mixin", () => {
-      localLogger = BNLogger(
+      localLogger = buildLogger(
         {
           formatLog: (obj) => {
-            return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key.toUpperCase(), value]));
+            return Object.fromEntries(Object.entries(obj).map(([ key, value ]) => [ key.toUpperCase(), value ]));
           },
         },
         stream
@@ -261,9 +262,7 @@ Feature("Logging options", () => {
 
     Then("the formatter should be used", () => {
       expect(logs.length).to.equal(1);
-      expect(logs[0]).to.deep.include({
-        FOO: "bar",
-      });
+      expect(logs[0]).to.deep.include({ FOO: "bar" });
     });
   });
 });

@@ -1,4 +1,5 @@
 import pino, { DestinationStream, LoggerOptions } from "pino";
+
 import { getGcpProjectId } from "./gcp";
 import { getStore } from "./middleware";
 import { getTraceFromTraceparent } from "./traceparent";
@@ -30,7 +31,7 @@ type BnLoggerOptions = Omit<LoggerOptions, "level" | "formatters"> & {
 
 export function logger(options: BnLoggerOptions = {}, stream?: DestinationStream | undefined) {
   const env = process.env.NODE_ENV /* c8 ignore next */ || "development";
-  const shouldPrettyPrint = ["development", "test", "dev"].includes(env) && !stream;
+  const shouldPrettyPrint = [ "development", "test", "dev" ].includes(env) && !stream;
 
   const logLocation = env === "test" && "./logs/test.log";
 
@@ -43,13 +44,13 @@ export function logger(options: BnLoggerOptions = {}, stream?: DestinationStream
     /* c8 ignore start */
     transport = shouldPrettyPrint
       ? {
-          target: "pino-pretty",
-          options: {
-            destination: logLocation || 1,
-            colorize: !logLocation,
-            messageKey: "message",
-          },
-        }
+        target: "pino-pretty",
+        options: {
+          destination: logLocation || 1,
+          colorize: !logLocation,
+          messageKey: "message",
+        },
+      }
       : undefined,
     /* c8 ignore stop */
     mixin,
