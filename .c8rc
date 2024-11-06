@@ -5,5 +5,5 @@
   "branches": "100",
   "functions": "100",
   "lines": "100",
-  "exclude": ["coverage", "dist", "test", "index.ts", "eslint.config.js"]
+  "exclude": ["coverage", "dist", "examples", "test", "index.ts", "eslint.config.js"]
 }

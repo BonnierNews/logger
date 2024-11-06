@@ -1,0 +1,14 @@
+{
+  "overrides": [
+    {
+      "files": [
+        "*"
+      ],
+      "settings": {
+        "import/core-modules": [
+          "@bonniernews/logger"
+        ]
+      }
+    }
+  ]
+}

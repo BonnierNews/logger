@@ -39,6 +39,8 @@ app.get("/", async (req, res) => {
 });
 ```
 
+More examples can be found in the [examples](./examples) directory.
+
 ### Logger Interface
 
 #### Options
