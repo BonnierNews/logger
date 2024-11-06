@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
-import { getStore, middleware as createMiddleware, Store } from "../../lib/middleware";
+
+import { middleware as createMiddleware, getStore, Store } from "../../lib/middleware";
 
 describe("Express middleware", () => {
   let middleware: RequestHandler;
@@ -24,7 +25,7 @@ describe("Express middleware", () => {
   });
 
   it("should create a new traceparent and store it in the store if no traceparent header was provided", async () => {
-    const req = { header: () => {} };
+    const req = { header: () => undefined };
 
     // @ts-expect-error - We don't need the full Express Request object
     await middleware(req, {}, () => {

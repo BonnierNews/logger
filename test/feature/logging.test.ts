@@ -1,13 +1,14 @@
 import type { RequestHandler } from "express";
 import gcpMetaData from "gcp-metadata";
 import { createSandbox } from "sinon";
-import { logger as BNLogger, decorateLogs, Logger } from "../../lib/logging";
+
+import { logger as buildLogger, decorateLogs, Logger } from "../../lib/logging";
 import { middleware as createMiddleware } from "../../lib/middleware";
 
 const logs: Record<string, unknown>[] = [];
 const stream = { write: (data: string) => logs.push(JSON.parse(data)) };
 
-const logger = BNLogger({}, stream);
+const logger = buildLogger({}, stream);
 
 const sandbox = createSandbox();
 
@@ -135,7 +136,7 @@ Feature("Logging with tracing", () => {
     Then("trace data should be logged", () => {
       expect(logs.length).to.equal(1);
       expect(logs[0]).to.deep.include({ message: "test" });
-      expect(logs[0]).to.include.all.keys(["traceId", "spanId"]);
+      expect(logs[0]).to.include.all.keys([ "traceId", "spanId" ]);
       expect(logs[0]).to.not.have.any.keys([
         "logging.googleapis.com/trace",
         "logging.googleapis.com/spanId",
@@ -191,7 +192,7 @@ Feature("Logging options", () => {
   Scenario("Logging with custom mixin", () => {
     let localLogger: Logger;
     Given("a logger with a custom mixin", () => {
-      localLogger = BNLogger({ mixin: () => ({ foo: "bar" }) }, stream);
+      localLogger = buildLogger({ mixin: () => ({ foo: "bar" }) }, stream);
     });
 
     When("logging", () => {
@@ -210,10 +211,10 @@ Feature("Logging options", () => {
   Scenario("Logging with custom mixin and trace context", () => {
     let localLogger: Logger;
     Given("a logger with a custom mixin", () => {
-      localLogger = BNLogger({ mixin: () => ({ foo: "bar" }) }, stream);
+      localLogger = buildLogger({ mixin: () => ({ foo: "bar" }) }, stream);
     });
 
-    And("we can fetch the GCP project ID from the metadata server", async () => {
+    And("we can fetch the GCP project ID from the metadata server", () => {
       sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
       sandbox.stub(gcpMetaData, "project").resolves("test-project");
     });
@@ -242,10 +243,10 @@ Feature("Logging options", () => {
   Scenario("Logging with `formatLog`", () => {
     let localLogger: Logger;
     Given("a logger with a custom mixin", () => {
-      localLogger = BNLogger(
+      localLogger = buildLogger(
         {
           formatLog: (obj) => {
-            return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key.toUpperCase(), value]));
+            return Object.fromEntries(Object.entries(obj).map(([ key, value ]) => [ key.toUpperCase(), value ]));
           },
         },
         stream
@@ -258,9 +259,7 @@ Feature("Logging options", () => {
 
     Then("the formatter should be used", () => {
       expect(logs.length).to.equal(1);
-      expect(logs[0]).to.deep.include({
-        FOO: "bar",
-      });
+      expect(logs[0]).to.deep.include({ FOO: "bar" });
     });
   });
 });
@@ -283,10 +282,10 @@ Feature("Decorating logs", () => {
 
   Scenario("Decorated fields are tied to request scope", () => {
     const middleware: RequestHandler = createMiddleware();
-    let logger: Logger;
+    let localLogger: Logger;
 
     Given("a logger", () => {
-      logger = BNLogger({}, stream);
+      localLogger = buildLogger({}, stream);
     });
 
     When("using the logger in different contexts", async () => {
@@ -295,12 +294,12 @@ Feature("Decorating logs", () => {
         middleware({ header: () => "" }, {}, () => {
           decorateLogs({ one: "one", two: "two" });
 
-          logger.info("Request context");
+          localLogger.info("Request context");
           resolve();
         });
       });
 
-      logger.info("No context");
+      localLogger.info("No context");
     });
 
     Then("The log contains the decorated", () => {
@@ -315,7 +314,7 @@ Feature("Decorating logs", () => {
     And("The log outside request context is without those fields", () => {
       expect(logs.length).to.equal(2);
       expect(logs[1]).to.deep.include({ message: "No context" });
-      expect(logs[1]).to.not.have.any.keys(["one", "two"]);
+      expect(logs[1]).to.not.have.any.keys([ "one", "two" ]);
     });
   });
 });

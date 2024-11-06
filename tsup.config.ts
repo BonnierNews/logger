@@ -1,9 +1,9 @@
 import { defineConfig } from "tsup";
 
 export const tsup = defineConfig({
-  entry: ["./index.ts"],
+  entry: [ "./index.ts" ],
   outDir: "./dist",
-  format: ["cjs", "esm"],
+  format: [ "cjs", "esm" ],
   dts: true,
   splitting: false,
   sourcemap: true,

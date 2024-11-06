@@ -1,5 +1,6 @@
 import gcpMetaData from "gcp-metadata";
 import { createSandbox } from "sinon";
+
 import { getGcpProjectId } from "../../lib/gcp";
 
 const sandbox = createSandbox();

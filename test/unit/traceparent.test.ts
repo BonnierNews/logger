@@ -1,7 +1,7 @@
-import { getTraceFromTraceparent, createTraceparent } from "../../lib/traceparent";
+import { createTraceparent, getTraceFromTraceparent } from "../../lib/traceparent";
 
 describe("Traceparent parsing", () => {
-  it("should parse a traceparent header correctly", async () => {
+  it("should parse a traceparent header correctly", () => {
     const traceparent = "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01";
 
     const trace = getTraceFromTraceparent(traceparent);
@@ -13,7 +13,7 @@ describe("Traceparent parsing", () => {
     });
   });
 
-  it("should return undefined if the traceparent header is invalid", async () => {
+  it("should return undefined if the traceparent header is invalid", () => {
     const traceparent = "invalid";
 
     const trace = getTraceFromTraceparent(traceparent);
@@ -39,9 +39,9 @@ describe("Traceparent parsing", () => {
 });
 
 describe("Traceparent creation", () => {
-  it("should create a traceparent header correctly", async () => {
+  it("should create a traceparent header correctly", () => {
     const traceparent = createTraceparent();
-    const [version, traceId, parentId, isSampled] = traceparent.split("-");
+    const [ version, traceId, parentId, isSampled ] = traceparent.split("-");
 
     expect(version).to.equal("00"); // we only support version 00
     expect(isSampled).to.equal("00"); // default is not sampled
@@ -52,9 +52,9 @@ describe("Traceparent creation", () => {
     expect(new RegExp(/^[\da-f]{2}$/).test(isSampled)).to.equal(true, isSampled);
   });
 
-  it("Sets flags if passed isSampled true", async () => {
+  it("Sets flags if passed isSampled true", () => {
     const traceparent = createTraceparent(true);
-    const [, , , isSampled] = traceparent.split("-");
+    const [ , , , isSampled ] = traceparent.split("-");
 
     expect(isSampled).to.equal("01");
   });

@@ -1,5 +1,6 @@
 import type { RequestHandler } from "express";
 import { AsyncLocalStorage } from "node:async_hooks";
+
 import { getGcpProjectId } from "./gcp";
 import { getTraceFromTraceparent, createTraceparent } from "./traceparent";
 
