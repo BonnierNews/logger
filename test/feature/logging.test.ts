@@ -1,9 +1,9 @@
+import type { RequestHandler } from "express";
 import gcpMetaData from "gcp-metadata";
 import pino from "pino";
 import { createSandbox } from "sinon";
-import { fetchGcpProjectId, reset } from "../../lib/gcp";
 import { logger as BNLogger } from "../../lib/logging";
-import { middleware } from "../../lib/middleware";
+import { middleware as createMiddleware } from "../../lib/middleware";
 
 const logs: Record<string, unknown>[] = [];
 const stream = { write: (data: string) => logs.push(JSON.parse(data)) };
@@ -17,22 +17,23 @@ const spanId = "b7ad6b7169203331";
 const traceparent = `00-${traceId}-${spanId}-01`;
 
 Feature("Logging with tracing", () => {
+  let middleware: RequestHandler = createMiddleware();
+
   afterEachScenario(() => {
     logs.length = 0;
     sandbox.restore();
-    reset();
+    middleware = createMiddleware();
   });
 
   Scenario("Logging in the middleware context", () => {
-    Given("we can fetch the GCP project ID from the metadata server", async () => {
+    Given("we can fetch the GCP project ID from the metadata server", () => {
       sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
       sandbox.stub(gcpMetaData, "project").resolves("test-project");
-      await fetchGcpProjectId();
     });
 
-    When("logging in the middleware context", () => {
+    When("logging in the middleware context", async () => {
       // @ts-expect-error - We don't need the full Express Request object
-      middleware({ header: () => traceparent }, {}, () => {
+      await middleware({ header: () => traceparent }, {}, () => {
         logger.info("test");
       });
     });
@@ -51,15 +52,14 @@ Feature("Logging with tracing", () => {
   });
 
   Scenario("Logging in the middleware context, but without traceparent header", () => {
-    Given("we can fetch the GCP project ID from the metadata server", async () => {
+    Given("we can fetch the GCP project ID from the metadata server", () => {
       sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
       sandbox.stub(gcpMetaData, "project").resolves("test-project");
-      await fetchGcpProjectId();
     });
 
-    When("logging in the middleware context", () => {
+    When("logging in the middleware context", async () => {
       // @ts-expect-error - We don't need the full Express Request object
-      middleware({ header: () => "" }, {}, () => {
+      await middleware({ header: () => "" }, {}, () => {
         logger.info("test");
       });
     });
@@ -78,15 +78,14 @@ Feature("Logging with tracing", () => {
   });
 
   Scenario("Logging in the middleware context, but with invalid traceparent header", () => {
-    Given("we can fetch the GCP project ID from the metadata server", async () => {
+    Given("we can fetch the GCP project ID from the metadata server", () => {
       sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
       sandbox.stub(gcpMetaData, "project").resolves("test-project");
-      await fetchGcpProjectId();
     });
 
-    When("logging in the middleware context", () => {
+    When("logging in the middleware context", async () => {
       // @ts-expect-error - We don't need the full Express Request object
-      middleware({ header: () => "foo" }, {}, () => {
+      await middleware({ header: () => "foo" }, {}, () => {
         logger.info("test");
       });
     });
@@ -123,14 +122,13 @@ Feature("Logging with tracing", () => {
   });
 
   Scenario("Logging in the middleware context, without metadata server", () => {
-    Given("we can't fetch the GCP project ID from the metadata server", async () => {
+    Given("we can't fetch the GCP project ID from the metadata server", () => {
       sandbox.stub(gcpMetaData, "isAvailable").resolves(false);
-      await fetchGcpProjectId();
     });
 
-    When("logging in the middleware context", () => {
+    When("logging in the middleware context", async () => {
       // @ts-expect-error - We don't need the full Express Request object
-      middleware({ header: () => traceparent }, {}, () => {
+      await middleware({ header: () => traceparent }, {}, () => {
         logger.info("test");
       });
     });
@@ -184,10 +182,12 @@ Feature("GCP logging severities", () => {
 });
 
 Feature("Logging options", () => {
+  let middleware: RequestHandler = createMiddleware();
+
   afterEachScenario(() => {
     logs.length = 0;
     sandbox.restore();
-    reset();
+    middleware = createMiddleware();
   });
 
   Scenario("Logging with custom mixin", () => {
@@ -218,12 +218,11 @@ Feature("Logging options", () => {
     And("we can fetch the GCP project ID from the metadata server", async () => {
       sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
       sandbox.stub(gcpMetaData, "project").resolves("test-project");
-      await fetchGcpProjectId();
     });
 
-    When("logging in the middleware context", () => {
+    When("logging in the middleware context", async () => {
       // @ts-expect-error - We don't need the full Express Request object
-      middleware({ header: () => traceparent }, {}, () => {
+      await middleware({ header: () => traceparent }, {}, () => {
         localLogger.info("test");
       });
     });

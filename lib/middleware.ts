@@ -11,14 +11,14 @@ type LogFields = {
   [key: string]: unknown;
 };
 
-type Store = {
+export type Store = {
   traceparent?: string;
   logFields: LogFields;
 };
 
-const storage = new AsyncLocalStorage<Store>();
-
 export type Middleware = () => RequestHandler;
+
+const storage = new AsyncLocalStorage<Store>();
 
 export const middleware: Middleware = () => {
   let initialized = false;
