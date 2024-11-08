@@ -11,6 +11,16 @@ describe("Express middleware", () => {
     });
   });
 
+  it("should create a new traceparent and store it in the store if no traceparent header was provided", () => {
+    const req = { header: () => {} };
+
+    // @ts-expect-error - We don't need the full Express Request object
+    middleware(req, {}, () => {
+      const traceparent = getStore().traceparent || "";
+      expect(new RegExp(/^[\da-f-]{55}$/).test(traceparent)).to.equal(true);
+    });
+  });
+
   it("should return an empty object if the middleware is not used", () => {
     expect(getStore()).to.deep.equal({});
   });
