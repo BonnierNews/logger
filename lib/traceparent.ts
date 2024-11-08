@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 /**
  * Traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-00
  *
@@ -16,4 +18,13 @@ export function getTraceFromTraceparent(traceHeader: string) {
     parentId: parts[2],
     isSampled: parts[3] !== "00",
   };
+}
+
+export function createTraceparent(isSampled: boolean = false) {
+  const version = "00";
+  const traceId = crypto.randomBytes(16).toString("hex");
+  const parentId = crypto.randomBytes(8).toString("hex");
+  const flags = isSampled ? "01" : "00";
+
+  return `${version}-${traceId}-${parentId}-${flags}`;
 }
