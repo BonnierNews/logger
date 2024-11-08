@@ -21,7 +21,7 @@ describe("Traceparent parsing", () => {
     expect(trace).to.equal(undefined);
   });
 
-  describe('isSampled', () => { 
+  describe("isSampled", () => {
     [
       { input: "00", expected: false },
       { input: "01", expected: true },
@@ -33,5 +33,5 @@ describe("Traceparent parsing", () => {
         expect(isSampled(input)).to.equal(expected);
       });
     });
-   })
+  });
 });
