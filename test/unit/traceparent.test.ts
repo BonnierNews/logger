@@ -1,4 +1,4 @@
-import { getTraceFromTraceparent, isSampled } from "../../lib/traceparent";
+import { getTraceFromTraceparent } from "../../lib/traceparent";
 
 describe("Traceparent parsing", () => {
   it("should parse a traceparent header correctly", async () => {
@@ -28,9 +28,11 @@ describe("Traceparent parsing", () => {
       { input: "02", expected: false },
       { input: "03", expected: true },
       { input: "ff", expected: true },
+      { input: "bar", expected: false },
     ].forEach(({ input, expected }) => {
-      it(`Should calculate isSampled("${input}") as ${expected}`, () => {
-        expect(isSampled(input)).to.equal(expected);
+      it(`Should calculate trace-flags "${input}" as isSampled: ${expected}`, () => {
+        const traceparent = `00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-${input}`;
+        expect(getTraceFromTraceparent(traceparent)?.isSampled).to.equal(expected);
       });
     });
   });
