@@ -37,13 +37,12 @@ export const middleware: Middleware = () => {
 
     if (trace) {
       logFields.traceId = trace.traceId;
+      logFields.spanId = trace.parentId;
 
       if (projectId) {
         logFields["logging.googleapis.com/trace"] = `projects/${projectId}/traces/${trace.traceId}`;
         logFields["logging.googleapis.com/spanId"] = trace.parentId;
         logFields["logging.googleapis.com/trace_sampled"] = trace.isSampled;
-      } else {
-        logFields.spanId = trace.parentId;
       }
     }
 

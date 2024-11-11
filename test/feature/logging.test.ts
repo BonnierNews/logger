@@ -42,6 +42,7 @@ Feature("Logging with tracing", () => {
       expect(logs[0]).to.deep.include({
         message: "test",
         traceId,
+        spanId,
         "logging.googleapis.com/trace": `projects/test-project/traces/${traceId}`,
         "logging.googleapis.com/spanId": spanId,
         "logging.googleapis.com/trace_sampled": true,
@@ -67,6 +68,7 @@ Feature("Logging with tracing", () => {
       expect(logs[0]).to.deep.include({ message: "test" });
       expect(logs[0]).to.include.all.keys([
         "traceId",
+        "spanId",
         "logging.googleapis.com/trace",
         "logging.googleapis.com/spanId",
         "logging.googleapis.com/trace_sampled",
@@ -229,6 +231,7 @@ Feature("Logging options", () => {
         message: "test",
         foo: "bar",
         traceId,
+        spanId,
         "logging.googleapis.com/trace": `projects/test-project/traces/${traceId}`,
         "logging.googleapis.com/spanId": spanId,
         "logging.googleapis.com/trace_sampled": true,
