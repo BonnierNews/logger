@@ -23,11 +23,10 @@ describe("GCP log fields", () => {
   });
 
   it("should use the environment variable if provided", async () => {
-    const oldGcpProject = process.env.GCP_PROJECT;
     process.env.GCP_PROJECT = "test-project-env";
 
     expect(await getGcpProjectId()).to.equal("test-project-env");
 
-    process.env.GCP_PROJECT = oldGcpProject;
+    delete process.env.GCP_PROJECT;
   });
 });

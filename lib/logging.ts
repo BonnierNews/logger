@@ -1,4 +1,8 @@
-import pino, { DestinationStream, LoggerOptions as PinoOptions, Logger as PinoLogger } from "pino";
+import pino, {
+  DestinationStream as PinoDestinationStream,
+  LoggerOptions as PinoOptions,
+  Logger as PinoLogger,
+} from "pino";
 import { getStore } from "./middleware";
 
 function getLoggingData() {
@@ -20,12 +24,14 @@ export function decorateLogs(obj: Record<string, unknown>) {
   }
 }
 
+export type Logger = PinoLogger<never, boolean>;
+
 export type LoggerOptions = Omit<PinoOptions, "level" | "formatters"> & {
   logLevel?: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
   formatLog?: NonNullable<PinoOptions["formatters"]>["log"];
 };
 
-export type Logger = PinoLogger<never, boolean>;
+export type DestinationStream = PinoDestinationStream;
 
 export function logger(options: LoggerOptions = {}, stream?: DestinationStream | undefined): Logger {
   const env = process.env.NODE_ENV /* c8 ignore next */ || "development";

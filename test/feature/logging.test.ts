@@ -1,8 +1,7 @@
 import type { RequestHandler } from "express";
 import gcpMetaData from "gcp-metadata";
-import pino from "pino";
 import { createSandbox } from "sinon";
-import { logger as BNLogger } from "../../lib/logging";
+import { logger as BNLogger, decorateLogs, Logger } from "../../lib/logging";
 import { middleware as createMiddleware } from "../../lib/middleware";
 
 const logs: Record<string, unknown>[] = [];
@@ -43,7 +42,6 @@ Feature("Logging with tracing", () => {
       expect(logs[0]).to.deep.include({
         message: "test",
         traceId,
-        spanId,
         "logging.googleapis.com/trace": `projects/test-project/traces/${traceId}`,
         "logging.googleapis.com/spanId": spanId,
         "logging.googleapis.com/trace_sampled": true,
@@ -64,12 +62,11 @@ Feature("Logging with tracing", () => {
       });
     });
 
-    Then("no trace data should be logged", () => {
+    Then("a trace should be automatically generated, and trace data should be logged", () => {
       expect(logs.length).to.equal(1);
       expect(logs[0]).to.deep.include({ message: "test" });
-      expect(logs[0]).not.to.have.all.keys([
+      expect(logs[0]).to.include.all.keys([
         "traceId",
-        "spanId",
         "logging.googleapis.com/trace",
         "logging.googleapis.com/spanId",
         "logging.googleapis.com/trace_sampled",
@@ -93,7 +90,7 @@ Feature("Logging with tracing", () => {
     Then("no trace data should be logged", () => {
       expect(logs.length).to.equal(1);
       expect(logs[0]).to.deep.include({ message: "test" });
-      expect(logs[0]).not.to.have.all.keys([
+      expect(logs[0]).to.not.have.any.keys([
         "traceId",
         "spanId",
         "logging.googleapis.com/trace",
@@ -111,7 +108,7 @@ Feature("Logging with tracing", () => {
     Then("no trace data should be logged", () => {
       expect(logs.length).to.equal(1);
       expect(logs[0]).to.deep.include({ message: "test" });
-      expect(logs[0]).not.to.have.all.keys([
+      expect(logs[0]).to.not.have.any.keys([
         "traceId",
         "spanId",
         "logging.googleapis.com/trace",
@@ -136,9 +133,8 @@ Feature("Logging with tracing", () => {
     Then("trace data should be logged", () => {
       expect(logs.length).to.equal(1);
       expect(logs[0]).to.deep.include({ message: "test" });
-      expect(logs[0]).not.to.have.all.keys([
-        "traceId",
-        "spanId",
+      expect(logs[0]).to.include.all.keys(["traceId", "spanId"]);
+      expect(logs[0]).to.not.have.any.keys([
         "logging.googleapis.com/trace",
         "logging.googleapis.com/spanId",
         "logging.googleapis.com/trace_sampled",
@@ -191,7 +187,7 @@ Feature("Logging options", () => {
   });
 
   Scenario("Logging with custom mixin", () => {
-    let localLogger: pino.Logger;
+    let localLogger: Logger;
     Given("a logger with a custom mixin", () => {
       localLogger = BNLogger({ mixin: () => ({ foo: "bar" }) }, stream);
     });
@@ -210,7 +206,7 @@ Feature("Logging options", () => {
   });
 
   Scenario("Logging with custom mixin and trace context", () => {
-    let localLogger: pino.Logger;
+    let localLogger: Logger;
     Given("a logger with a custom mixin", () => {
       localLogger = BNLogger({ mixin: () => ({ foo: "bar" }) }, stream);
     });
@@ -233,7 +229,6 @@ Feature("Logging options", () => {
         message: "test",
         foo: "bar",
         traceId,
-        spanId,
         "logging.googleapis.com/trace": `projects/test-project/traces/${traceId}`,
         "logging.googleapis.com/spanId": spanId,
         "logging.googleapis.com/trace_sampled": true,
@@ -242,7 +237,7 @@ Feature("Logging options", () => {
   });
 
   Scenario("Logging with `formatLog`", () => {
-    let localLogger: pino.Logger;
+    let localLogger: Logger;
     Given("a logger with a custom mixin", () => {
       localLogger = BNLogger(
         {
@@ -263,6 +258,61 @@ Feature("Logging options", () => {
       expect(logs[0]).to.deep.include({
         FOO: "bar",
       });
+    });
+  });
+});
+
+Feature("Decorating logs", () => {
+  afterEachScenario(() => {
+    logs.length = 0;
+    sandbox.restore();
+  });
+
+  Scenario("Decorate logs with improper initialization", () => {
+    Given("Middleware has not been initialized", () => {
+      // noop
+    });
+
+    Then("decorateLogs throws an error on use", () => {
+      expect(() => decorateLogs({ key: "value" })).to.throw();
+    });
+  });
+
+  Scenario("Decorated fields are tied to request scope", () => {
+    const middleware: RequestHandler = createMiddleware();
+    let logger: Logger;
+
+    Given("a logger", () => {
+      logger = BNLogger({}, stream);
+    });
+
+    When("using the logger in different contexts", async () => {
+      await new Promise<void>((resolve) => {
+        // @ts-expect-error - We don't need the full Express Request object
+        middleware({ header: () => "" }, {}, () => {
+          decorateLogs({ one: "one", two: "two" });
+
+          logger.info("Request context");
+          resolve();
+        });
+      });
+
+      logger.info("No context");
+    });
+
+    Then("The log contains the decorated", () => {
+      expect(logs.length).to.equal(2);
+      expect(logs[0]).to.deep.include({
+        message: "Request context",
+        one: "one",
+        two: "two",
+      });
+    });
+
+    And("The log outside request context is without those fields", () => {
+      expect(logs.length).to.equal(2);
+      expect(logs[1]).to.deep.include({ message: "No context" });
+      expect(logs[1]).to.not.have.any.keys(["one", "two"]);
     });
   });
 });
