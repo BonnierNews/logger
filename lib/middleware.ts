@@ -5,6 +5,7 @@ import { getTraceFromTraceparent, createTraceparent } from "./traceparent";
 
 type LogFields = {
   traceId?: string;
+  spanId?: string;
   "logging.googleapis.com/trace"?: string;
   "logging.googleapis.com/spanId"?: string;
   "logging.googleapis.com/trace_sampled"?: boolean;
@@ -41,6 +42,8 @@ export const middleware: Middleware = () => {
         logFields["logging.googleapis.com/trace"] = `projects/${projectId}/traces/${trace.traceId}`;
         logFields["logging.googleapis.com/spanId"] = trace.parentId;
         logFields["logging.googleapis.com/trace_sampled"] = trace.isSampled;
+      } else {
+        logFields.spanId = trace.parentId;
       }
     }
 
