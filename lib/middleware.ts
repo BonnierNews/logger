@@ -21,6 +21,12 @@ export type Middleware = () => RequestHandler;
 
 const storage = new AsyncLocalStorage<Store>();
 
+/**
+ * Express middleware to be used to automatically decorate all logs with trace information.
+ *
+ * Only logs that occur inside the request context will be decorated, and applications running
+ * in GCP will get the appropriate log fields to show up correctly in the GCP Trace Explorer.
+ */
 export const middleware: Middleware = () => {
   let initialized = false;
   let projectId: string | undefined;

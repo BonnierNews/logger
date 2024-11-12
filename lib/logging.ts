@@ -33,6 +33,9 @@ export type LoggerOptions = Omit<PinoOptions, "level" | "formatters"> & {
 
 export type DestinationStream = PinoDestinationStream;
 
+/**
+ * Creates a pino logger that is pre-configured and ready to be used with minimal setup.
+ */
 export function logger(options: LoggerOptions = {}, stream?: DestinationStream | undefined): Logger {
   const env = process.env.NODE_ENV /* c8 ignore next */ || "development";
   const shouldPrettyPrint = ["development", "test", "dev"].includes(env) && !stream;
