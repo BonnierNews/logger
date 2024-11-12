@@ -1,11 +1,20 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "@bonniernews/tsconfig",
   "compilerOptions": {
-    "rootDir": "./",
-    "outDir": "./dist",
-    "declaration": true,
-    "esModuleInterop": true,
-    "types": ["node", "mocha", "chai"]
+    "noEmit": true,
+    "moduleResolution": "bundler",
+    "rootDir": ".",
+    "types": [
+      "node",
+      "mocha",
+      "chai"
+    ]
   },
-  "include": ["lib", "@types", "index.ts", "test"]
+  "include": [
+    "lib",
+    "@types",
+    "index.ts",
+    "test"
+  ]
 }
