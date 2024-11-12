@@ -39,6 +39,14 @@
   },
   "author": "Bonnier News",
   "license": "MIT",
+  "peerDependencies": {
+    "@types/express": "^4.0.0 || ^5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/express": {
+      "optional": true
+    }
+  },
   "dependencies": {
     "gcp-metadata": "^6.1.0",
     "pino": "^9.5.0",
