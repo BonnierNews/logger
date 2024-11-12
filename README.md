@@ -12,21 +12,18 @@ Here is an example server with log tracing enabled.
 
 ```js
 import {
-  fetchGcpProjectId,
   getHttpTraceHeader,
   middleware,
-  logger as BNLogger
+  logger as buildLogger
 } from "@bonniernews/logger";
 import express from "express";
 
-const logger = BNLogger();
+const logger = buildLogger();
 const app = express();
 
-app.use(middleware);
-
-// Fetches the project ID from the GCP metadata server in the background on startup.
-// This is only necessary if you don't set the `GCP_PROJECT` environment variable.
-fetchGcpProjectId();
+// This middleware will create a request context and
+// automatically decorate all logs with tracing data:
+app.use(middleware());
 
 app.get("/", async (req, res) => {
   logger.info("Hello, world!");
@@ -38,6 +35,12 @@ app.get("/", async (req, res) => {
   ...
 });
 ```
+
+The `middleware` should be put as early as possible, since only logs after this middleware will get the tracing data. The middleware will lookup the active project ID from GCP. Alternatively, you can set the `GCP_PROJECT` environment variable for this purpose.
+
+Use the `getHttpTraceHeader` function to pass tracing headers to downstream services.
+
+If you want to decorate logs with custom data, use the exported `decorateLogs` function. In order to use this, the middleware needs to be installed first.
 
 ### Logger Interface
 

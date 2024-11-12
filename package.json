@@ -1,6 +1,6 @@
 {
   "name": "@bonniernews/logger",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Some simple functions to use Trace Context for correlating logs",
   "type": "module",
   "main": "dist/index.js",
@@ -10,11 +10,15 @@
   ],
   "repository": {
     "type": "git",
-    "url": "github:BonnierNews/logger"
+    "url": "git+https://github.com/BonnierNews/logger.git"
   },
+  "bugs": {
+    "url": "https://github.com/BonnierNews/logger/issues"
+  },
+  "homepage": "https://github.com/BonnierNews/logger#readme",
   "scripts": {
     "build": "tsc",
-    "lint": "eslint .",
+    "lint": "eslint . --cache",
     "format": "prettier --write . && eslint --fix .",
     "typecheck": "tsc --noEmit",
     "test": "mocha --exit --reporter ${REPORTER:-spec}",
@@ -22,12 +26,12 @@
     "local-coverage": "c8 --reporter html npm test && c8 check-coverage || open ./coverage/index.html",
     "prepublishOnly": "npm run build"
   },
-  "author": "",
+  "author": "Bonnier News",
   "license": "MIT",
   "dependencies": {
     "gcp-metadata": "^6.1.0",
     "pino": "^9.5.0",
-    "pino-pretty": "^11.3.0"
+    "pino-pretty": "^13.0.0"
   },
   "devDependencies": {
     "@bonniernews/tsconfig": "^0.0.2",
@@ -35,18 +39,21 @@
     "@types/eslint__js": "^8.42.3",
     "@types/express": "^5.0.0",
     "@types/mocha": "^10.0.8",
-    "@types/node": "^22.7.3",
+    "@types/node": "^22.9.0",
     "@types/sinon": "^17.0.3",
     "c8": "^10.1.2",
     "chai": "^5.1.1",
-    "eslint": "^9.13.0",
+    "eslint": "^9.14.0",
     "express": "^4.21.0",
-    "mocha": "^10.7.3",
+    "mocha": "^10.8.2",
     "mocha-cakes-2": "^3.3.0",
     "prettier": "^3.3.3",
     "sinon": "^19.0.2",
     "tsx": "^4.19.1",
     "typescript": "^5.6.3",
-    "typescript-eslint": "^8.12.1"
+    "typescript-eslint": "^8.13.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

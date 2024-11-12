@@ -1,34 +1,39 @@
-import pino, { DestinationStream, LoggerOptions } from "pino";
-import { getGcpProjectId } from "./gcp";
+import pino, {
+  DestinationStream as PinoDestinationStream,
+  LoggerOptions as PinoOptions,
+  Logger as PinoLogger,
+} from "pino";
 import { getStore } from "./middleware";
-import { getTraceFromTraceparent } from "./traceparent";
 
-export function getLoggingTraceData() {
-  const { traceparent, ...rest } = getStore();
-  if (!traceparent) return rest;
-
-  const trace = getTraceFromTraceparent(traceparent);
-  if (!trace) return rest;
-
-  const logData = { traceId: trace.traceId, spanId: trace.parentId, ...rest };
-
-  const gcpProjectId = getGcpProjectId();
-  if (!gcpProjectId) return logData;
-
-  return {
-    ...logData,
-    "logging.googleapis.com/trace": `projects/${gcpProjectId}/traces/${trace.traceId}`,
-    "logging.googleapis.com/spanId": trace.parentId,
-    "logging.googleapis.com/trace_sampled": trace.isSampled,
-  };
+function getLoggingData() {
+  const store = getStore();
+  return store ? store.logFields : {};
 }
 
-type BnLoggerOptions = Omit<LoggerOptions, "level" | "formatters"> & {
+/**
+ * Add any additional log data to the request context. To use this feature, you must enable the
+ * request storage by initializing the built-in middleware.
+ */
+export function decorateLogs(obj: Record<string, unknown>) {
+  const store = getStore();
+
+  if (!store) throw new Error("@bonniernews/logger middleware has not been initialized");
+
+  for (const key in obj) {
+    store.logFields[key] = obj[key];
+  }
+}
+
+export type Logger = PinoLogger<never, boolean>;
+
+export type LoggerOptions = Omit<PinoOptions, "level" | "formatters"> & {
   logLevel?: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
-  formatLog?: NonNullable<LoggerOptions["formatters"]>["log"];
+  formatLog?: NonNullable<PinoOptions["formatters"]>["log"];
 };
 
-export function logger(options: BnLoggerOptions = {}, stream?: DestinationStream | undefined) {
+export type DestinationStream = PinoDestinationStream;
+
+export function logger(options: LoggerOptions = {}, stream?: DestinationStream | undefined): Logger {
   const env = process.env.NODE_ENV /* c8 ignore next */ || "development";
   const shouldPrettyPrint = ["development", "test", "dev"].includes(env) && !stream;
 
@@ -68,7 +73,7 @@ export function logger(options: BnLoggerOptions = {}, stream?: DestinationStream
         ...(formatLog && { log: formatLog }),
       },
       transport,
-      mixin: (...args) => ({ ...getLoggingTraceData(), ...mixin?.(...args) }),
+      mixin: (...args) => ({ ...getLoggingData(), ...mixin?.(...args) }),
       ...rest,
     },
     stream
