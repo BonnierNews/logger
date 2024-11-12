@@ -25,6 +25,9 @@ export function getTraceFromTraceparent(traceHeader: string) {
   };
 }
 
+/**
+ * Generate a unique traceparent header value.
+ */
 export function createTraceparent(isSampled: boolean = false) {
   const version = "00";
   const traceId = crypto.randomBytes(16).toString("hex");
