@@ -10,37 +10,37 @@ describe("Propagations", () => {
     middleware = createMiddleware();
   });
 
-  describe('getTraceparentObject', () => {
+  describe("getTraceparentObject", () => {
     it("should get the traceparent object from the middleware context", async () => {
       const traceparent = "00-abcdef0123456789abcdef0123456789-abcdef0123456789-01";
-  
+
       // @ts-expect-error - We don't need the full Express Request object
       await middleware({ header: () => traceparent }, {}, () => {
         expect(getTraceparentObject()).to.deep.equal({ traceparent });
       });
     });
-  
+
     it("should return undefined if run outside the middleware context", () => {
       expect(getTraceparentObject()).to.deep.equal(undefined);
     });
-  })
+  });
 
-  describe('getTraceparent', () => {
+  describe("getTraceparent", () => {
     it("should get the traceparent string from the middleware context", async () => {
       const traceparent = "00-abcdef0123456789abcdef0123456789-abcdef0123456789-01";
-  
+
       // @ts-expect-error - We don't need the full Express Request object
       await middleware({ header: () => traceparent }, {}, () => {
         expect(getTraceparent()).to.deep.equal(traceparent);
       });
     });
-  
+
     it("should return undefined if run outside the middleware context", () => {
       expect(getTraceparent()).to.deep.equal(undefined);
     });
-  })
-  
-  describe('getTraceId', () => {
+  });
+
+  describe("getTraceId", () => {
     it("should get the traceId from the middleware context", async () => {
       const traceparent = "00-abcdef0123456789abcdef0123456789-abcdef0123456789-01";
 
@@ -52,6 +52,6 @@ describe("Propagations", () => {
 
     it("should return undefined if run outside the middleware context", () => {
       expect(getTraceId()).to.deep.equal(undefined);
-    }); 
-  })  
+    });
+  });
 });

@@ -1,5 +1,5 @@
 import { getStore } from "./middleware";
-import { getTraceFromTraceparent } from "./traceparent"
+import { getTraceFromTraceparent } from "./traceparent";
 
 /**
  * Retrieves an object from the request context store with headers that can be used
@@ -30,7 +30,5 @@ export function getTraceparent(): string | undefined {
  */
 export function getTraceId(): string | undefined {
   const { traceparent } = getStore() || {};
-  return traceparent
-    ? getTraceFromTraceparent(traceparent)?.traceId
-    : undefined;
+  return traceparent ? getTraceFromTraceparent(traceparent)?.traceId : undefined;
 }
