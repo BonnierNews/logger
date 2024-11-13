@@ -44,7 +44,19 @@ Use `getTraceId` if you only want to know the current trace-id.
 
 If you want to decorate logs with custom data, use the exported `decorateLogs` function. In order to use this, the middleware needs to be installed first.
 
-### Logger Interface
+## Interface
+
+The library have these named exports:
+
+- `logger`: Used to create a logger, see [below](#logger).
+- `middleware`: A middleware to install a request context store that is used to decorate logs with automatic tracing. This middleware enables the use of `decorateLogs`, `getLoggingData`, `getTraceparent` and `getTraceId`.
+- `decorateLogs`: Function to add data to the request context.
+- `getLoggingData`: Returns decorated data fields together with trace information.
+- `getTraceparent`: Returns traceparent header value - to be used for requests to downstream services.
+- `getTraceId`: Returns the traceId value - useful if you want to add it to an API error response.
+- `createTraceparent`: Utility function to generate a traceparent header value.
+
+### Logger
 
 #### Options
 
