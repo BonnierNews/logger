@@ -5,6 +5,7 @@ import { middleware as createMiddleware } from "../../lib/middleware";
 
 describe("Propagations", () => {
   let middleware: RequestHandler;
+  const traceparent = "00-abcdef0123456789abcdef0123456789-abcdef0123456789-01";
 
   beforeEach(() => {
     middleware = createMiddleware();
@@ -12,8 +13,6 @@ describe("Propagations", () => {
 
   describe("getTraceparent", () => {
     it("should get the traceparent string from the middleware context", async () => {
-      const traceparent = "00-abcdef0123456789abcdef0123456789-abcdef0123456789-01";
-
       // @ts-expect-error - We don't need the full Express Request object
       await middleware({ header: () => traceparent }, {}, () => {
         expect(getTraceparent()).to.equal(traceparent);
@@ -27,8 +26,6 @@ describe("Propagations", () => {
 
   describe("getTraceId", () => {
     it("should get the traceId from the middleware context", async () => {
-      const traceparent = "00-abcdef0123456789abcdef0123456789-abcdef0123456789-01";
-
       // @ts-expect-error - We don't need the full Express Request object
       await middleware({ header: () => traceparent }, {}, () => {
         expect(getTraceId()).to.equal("abcdef0123456789abcdef0123456789");
