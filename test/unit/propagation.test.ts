@@ -1,6 +1,6 @@
 import type { RequestHandler } from "express";
 
-import { getTraceparentObject, getTraceparent, getTraceId } from "../../lib/propagation";
+import { getTraceparent, getTraceId } from "../../lib/propagation";
 import { middleware as createMiddleware } from "../../lib/middleware";
 
 describe("Propagations", () => {
@@ -8,21 +8,6 @@ describe("Propagations", () => {
 
   beforeEach(() => {
     middleware = createMiddleware();
-  });
-
-  describe("getTraceparentObject", () => {
-    it("should get the traceparent object from the middleware context", async () => {
-      const traceparent = "00-abcdef0123456789abcdef0123456789-abcdef0123456789-01";
-
-      // @ts-expect-error - We don't need the full Express Request object
-      await middleware({ header: () => traceparent }, {}, () => {
-        expect(getTraceparentObject()).to.deep.equal({ traceparent });
-      });
-    });
-
-    it("should return undefined if run outside the middleware context", () => {
-      expect(getTraceparentObject()).to.deep.equal(undefined);
-    });
   });
 
   describe("getTraceparent", () => {

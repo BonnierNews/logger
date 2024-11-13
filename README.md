@@ -12,7 +12,6 @@ Here is an example server with log tracing enabled.
 
 ```js
 import {
-  getTraceparentObject,
   getTraceparent,
   middleware,
   logger as buildLogger
@@ -29,11 +28,8 @@ app.use(middleware());
 app.get("/", async (req, res) => {
   logger.info("Hello, world!");
 
-  const response1 = await fetch("https://some.service.bn.nr/some/endpoint", {
-    headers: { ...getTraceparentObject() },
-  });
-
-  const response2 = await fetch("https://some.other.service.bn.nr/some/endpoint", {
+  // Propagate traceparent to other services
+  const response = await fetch("https://some.other.service.bn.nr/some/endpoint", {
     headers: { traceparent: getTraceparent() },
   });
 
@@ -43,7 +39,7 @@ app.get("/", async (req, res) => {
 
 The `middleware` should be put as early as possible, since only logs after this middleware will get the tracing data. The middleware will lookup the active project ID from GCP. Alternatively, you can set the `GCP_PROJECT` environment variable for this purpose.
 
-Use the `getTraceparentObject` or `getTraceparent` functions to pass tracing headers to downstream services.
+Use the `getTraceparent` function to pass tracing headers to downstream services.
 Use `getTraceId` if you only want to know the current trace-id.
 
 If you want to decorate logs with custom data, use the exported `decorateLogs` function. In order to use this, the middleware needs to be installed first.
