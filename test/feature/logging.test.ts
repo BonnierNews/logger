@@ -2,7 +2,7 @@ import type { RequestHandler } from "express";
 import gcpMetaData from "gcp-metadata";
 import { createSandbox } from "sinon";
 
-import { logger as buildLogger, decorateLogs, Logger } from "../../lib/logging";
+import { logger as buildLogger, decorateLogs, getLoggingData, Logger } from "../../lib/logging";
 import { middleware as createMiddleware } from "../../lib/middleware";
 
 const logs: Record<string, unknown>[] = [];
@@ -278,11 +278,16 @@ Feature("Decorating logs", () => {
     Then("decorateLogs throws an error on use", () => {
       expect(() => decorateLogs({ key: "value" })).to.throw();
     });
+
+    And("getLoggingData returns an empty object", () => {
+      expect(getLoggingData()).to.deep.equal({});
+    });
   });
 
   Scenario("Decorated fields are tied to request scope", () => {
     const middleware: RequestHandler = createMiddleware();
     let localLogger: Logger;
+    const decoratedFields: Record<string, unknown>[] = [];
 
     Given("a logger", () => {
       localLogger = buildLogger({}, stream);
@@ -291,23 +296,31 @@ Feature("Decorating logs", () => {
     When("using the logger in different contexts", async () => {
       await new Promise<void>((resolve) => {
         // @ts-expect-error - We don't need the full Express Request object
-        middleware({ header: () => "" }, {}, () => {
+        middleware({ header: () => traceparent }, {}, () => {
           decorateLogs({ one: "one", two: "two" });
 
           localLogger.info("Request context");
+          decoratedFields.push(getLoggingData());
           resolve();
         });
       });
 
       localLogger.info("No context");
+      decoratedFields.push(getLoggingData());
     });
 
-    Then("The log contains the decorated", () => {
+    Then("The log contains the decorated fields", () => {
       expect(logs.length).to.equal(2);
       expect(logs[0]).to.deep.include({
         message: "Request context",
         one: "one",
         two: "two",
+      });
+      expect(decoratedFields[0]).to.deep.equal({
+        one: "one",
+        two: "two",
+        spanId,
+        traceId,
       });
     });
 
@@ -315,6 +328,7 @@ Feature("Decorating logs", () => {
       expect(logs.length).to.equal(2);
       expect(logs[1]).to.deep.include({ message: "No context" });
       expect(logs[1]).to.not.have.any.keys([ "one", "two" ]);
+      expect(decoratedFields[1]).to.deep.equal({});
     });
   });
 });

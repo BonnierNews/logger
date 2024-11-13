@@ -2,11 +2,15 @@ import pino, {
   DestinationStream as PinoDestinationStream,
   Logger as PinoLogger,
   LoggerOptions as PinoOptions,
+  Level,
 } from "pino";
 
 import { getStore } from "./middleware";
 
-function getLoggingData() {
+/**
+ * Get the decorated log fields.
+ */
+export function getLoggingData(): Record<string, unknown> {
   const store = getStore();
   return store ? store.logFields : {};
 }
@@ -28,7 +32,8 @@ export function decorateLogs(obj: Record<string, unknown>) {
 export type Logger = PinoLogger<never, boolean>;
 
 export type LoggerOptions = Omit<PinoOptions, "level" | "formatters"> & {
-  logLevel?: "trace" | "debug" | "info" | "warn" | "error" | "fatal";
+  level?: Level;
+  logLevel?: Level;
   formatLog?: NonNullable<PinoOptions["formatters"]>["log"];
 };
 
@@ -44,7 +49,8 @@ export function logger(options: LoggerOptions = {}, stream?: DestinationStream |
   const logLocation = env === "test" && "./logs/test.log";
 
   const {
-    logLevel: level = "info",
+    logLevel = "info",
+    level,
     base = undefined,
     messageKey = "message",
     timestamp = () => `,"time": "${new Date().toISOString()}"`,
@@ -67,7 +73,7 @@ export function logger(options: LoggerOptions = {}, stream?: DestinationStream |
 
   return pino(
     {
-      level,
+      level: level || logLevel,
       base,
       messageKey,
       timestamp,
