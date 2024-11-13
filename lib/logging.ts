@@ -1,8 +1,9 @@
 import pino, {
   DestinationStream as PinoDestinationStream,
-  LoggerOptions as PinoOptions,
   Logger as PinoLogger,
+  LoggerOptions as PinoOptions,
 } from "pino";
+
 import { getStore } from "./middleware";
 
 function getLoggingData() {
@@ -38,7 +39,7 @@ export type DestinationStream = PinoDestinationStream;
  */
 export function logger(options: LoggerOptions = {}, stream?: DestinationStream | undefined): Logger {
   const env = process.env.NODE_ENV /* c8 ignore next */ || "development";
-  const shouldPrettyPrint = ["development", "test", "dev"].includes(env) && !stream;
+  const shouldPrettyPrint = [ "development", "test", "dev" ].includes(env) && !stream;
 
   const logLocation = env === "test" && "./logs/test.log";
 
@@ -51,13 +52,13 @@ export function logger(options: LoggerOptions = {}, stream?: DestinationStream |
     /* c8 ignore start */
     transport = shouldPrettyPrint
       ? {
-          target: "pino-pretty",
-          options: {
-            destination: logLocation || 1,
-            colorize: !logLocation,
-            messageKey: "message",
-          },
-        }
+        target: "pino-pretty",
+        options: {
+          destination: logLocation || 1,
+          colorize: !logLocation,
+          messageKey: "message",
+        },
+      }
       : undefined,
     /* c8 ignore stop */
     mixin,

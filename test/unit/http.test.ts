@@ -1,4 +1,5 @@
 import type { RequestHandler } from "express";
+
 import { getHttpTraceHeader } from "../../lib/http";
 import { middleware as createMiddleware } from "../../lib/middleware";
 

@@ -1,0 +1,4 @@
+{
+  "root": true,
+  "extends": ["@bonniernews/eslint-config/all", "@bonniernews/eslint-config/typescript"]
+}
