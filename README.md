@@ -29,11 +29,11 @@ app.use(middleware());
 app.get("/", async (req, res) => {
   logger.info("Hello, world!");
 
-  const response = await fetch("https://some.service.bn.nr/some/endpoint", {
+  const response1 = await fetch("https://some.service.bn.nr/some/endpoint", {
     headers: { ...getTraceparentObject() },
   });
 
-  const response = await fetch("https://some.other.service.bn.nr/some/endpoint", {
+  const response2 = await fetch("https://some.other.service.bn.nr/some/endpoint", {
     headers: { traceparent: getTraceparent() },
   });
 
