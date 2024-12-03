@@ -1,8 +1,8 @@
 import pino, {
+  Level,
   DestinationStream as PinoDestinationStream,
   Logger as PinoLogger,
   LoggerOptions as PinoOptions,
-  Level,
 } from "pino";
 
 import { getStore } from "./middleware";
@@ -43,7 +43,7 @@ export type DestinationStream = PinoDestinationStream;
  * Creates a pino logger that is pre-configured and ready to be used with minimal setup.
  */
 export function logger(options: LoggerOptions = {}, stream?: DestinationStream | undefined): Logger {
-  const env = process.env.NODE_ENV /* c8 ignore next */ || "development";
+  const env = process.env.NODE_ENV || "development";
   const shouldPrettyPrint = [ "development", "test", "dev" ].includes(env) && !stream;
 
   const logLocation = env === "test" && "./logs/test.log";
@@ -55,7 +55,6 @@ export function logger(options: LoggerOptions = {}, stream?: DestinationStream |
     messageKey = "message",
     timestamp = () => `,"time": "${new Date().toISOString()}"`,
     formatLog,
-    /* c8 ignore start */
     transport = shouldPrettyPrint
       ? {
         target: "pino-pretty",
@@ -66,7 +65,6 @@ export function logger(options: LoggerOptions = {}, stream?: DestinationStream |
         },
       }
       : undefined,
-    /* c8 ignore stop */
     mixin,
     ...rest
   } = options;
@@ -78,8 +76,7 @@ export function logger(options: LoggerOptions = {}, stream?: DestinationStream |
       messageKey,
       timestamp,
       formatters: {
-        level: (label) =>
-          shouldPrettyPrint ? /* c8 ignore next */ { level: label } : { severity: gcpSeverity(label) },
+        level: (label) => (shouldPrettyPrint ? { level: label } : { severity: gcpSeverity(label) }),
         ...(formatLog && { log: formatLog }),
       },
       transport,
@@ -104,7 +101,6 @@ function gcpSeverity(label: string) {
       return "ERROR";
     case "fatal":
       return "CRITICAL";
-    /* c8 ignore next 2 */
     default:
       return "DEFAULT";
   }

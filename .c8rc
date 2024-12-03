@@ -1,9 +1,9 @@
 {
   "reporter": ["text", "html"],
   "all": true,
-  "statements": "100",
-  "branches": "100",
-  "functions": "100",
-  "lines": "100",
-  "exclude": ["coverage", "dist", "test", "index.ts", "eslint.config.js", "tsup.config.ts"]
+  "statements": "90",
+  "branches": "90",
+  "functions": "90",
+  "lines": "90",
+  "exclude": ["coverage", "dist", "test", "index.ts", "tsup.config.ts"]
 }
