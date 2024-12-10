@@ -57,7 +57,7 @@ Feature("Logging with tracing", () => {
       sandbox.stub(gcpMetaData, "project").resolves("test-project");
     });
 
-    When("logging in the middleware context", async () => {
+    When("logging in the executed function context", async () => {
       await attachTraceHandler(() => {
         logger.info("test");
       }, traceparent);
