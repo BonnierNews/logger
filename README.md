@@ -12,7 +12,7 @@ Here is an example server with log tracing enabled.
 
 ```js
 import {
-  getTraceId,
+  getTraceparent,
   middleware,
   logger as buildLogger
 } from "@bonniernews/logger";
