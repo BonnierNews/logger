@@ -65,7 +65,7 @@ export function attachTraceHandler(f: () => any, traceparent?: string) {
  */
 export const middleware: Middleware = () => {
   return async (req, _res, next) => {
-    const traceparent = req.header("traceparent") || createTraceparent();
+    const traceparent = req.header("traceparent");
     await attachTraceHandler(next, traceparent);
   };
 };
