@@ -22,46 +22,9 @@ export type Middleware = () => RequestHandler;
 
 const storage = new AsyncLocalStorage<Store>();
 
-/**
- * Express middleware to be used to automatically decorate all logs with trace information.
- *
- * Only logs that occur inside the request context will be decorated, and applications running
- * in GCP will get the appropriate log fields to show up correctly in the GCP Trace Explorer.
- */
-export const middleware: Middleware = () => {
-  let initialized = false;
-  let projectId: string | undefined;
-
-  return async (req, _res, next) => {
-    if (!initialized) {
-      initialized = true;
-      projectId = await getGcpProjectId();
-    }
-
-    const traceparent = req.header("traceparent") || createTraceparent();
-    const trace = getTraceFromTraceparent(traceparent);
-    const logFields: LogFields = {};
-
-    if (trace) {
-      logFields.traceId = trace.traceId;
-      logFields.spanId = trace.parentId;
-
-      if (projectId) {
-        logFields["logging.googleapis.com/trace"] = `projects/${projectId}/traces/${trace.traceId}`;
-        logFields["logging.googleapis.com/spanId"] = trace.parentId;
-        logFields["logging.googleapis.com/trace_sampled"] = trace.isSampled;
-      }
-    }
-
-    storage.run({ traceparent, logFields }, () => {
-      next();
-    });
-  };
-};
-
 export function attachTraceHandler(f: () => any, traceparent?: string) {
-  let initialized = false;
   let projectId: string | undefined;
+  let initialized = false;
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     if (!initialized) {
@@ -93,6 +56,19 @@ export function attachTraceHandler(f: () => any, traceparent?: string) {
     });
   });
 }
+
+/**
+ * Express middleware to be used to automatically decorate all logs with trace information.
+ *
+ * Only logs that occur inside the request context will be decorated, and applications running
+ * in GCP will get the appropriate log fields to show up correctly in the GCP Trace Explorer.
+ */
+export const middleware: Middleware = () => {
+  return async (req, _res, next) => {
+    const traceparent = req.header("traceparent") || createTraceparent();
+    await attachTraceHandler(next, traceparent);
+  };
+};
 
 export function getStore(): Store | undefined {
   return storage.getStore();
