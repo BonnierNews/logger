@@ -55,6 +55,7 @@ export function logger(options: LoggerOptions = {}, stream?: DestinationStream |
     messageKey = "message",
     timestamp = () => `,"time": "${new Date().toISOString()}"`,
     formatLog,
+    /* c8 ignore start */
     transport = shouldPrettyPrint
       ? {
         target: "pino-pretty",
@@ -65,6 +66,7 @@ export function logger(options: LoggerOptions = {}, stream?: DestinationStream |
         },
       }
       : undefined,
+    /* c8 ignore stop */
     mixin,
     ...rest
   } = options;
