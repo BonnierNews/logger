@@ -59,9 +59,10 @@ export const middleware: Middleware = () => {
   };
 };
 
-export function attachTraceHandler(f, traceparent = undefined) {
+export function attachTraceHandler(f: () => any, traceparent?: string) {
   let initialized = false;
   let projectId: string | undefined;
+  // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     if (!initialized) {
       initialized = true;
