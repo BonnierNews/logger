@@ -16,7 +16,6 @@ const spanId = "b7ad6b7169203331";
 const traceparent = `00-${traceId}-${spanId}-01`;
 
 Feature("Logging with tracing", () => {
-
   afterEachScenario(() => {
     logs.length = 0;
     sandbox.restore();

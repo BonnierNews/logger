@@ -92,7 +92,6 @@ export function attachTraceHandler(f: () => any, traceparent?: string) {
       }
     });
   });
-
 }
 
 export function getStore(): Store | undefined {
