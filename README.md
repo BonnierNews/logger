@@ -12,7 +12,7 @@ Here is an example server with log tracing enabled.
 
 ```js
 import {
-  getTraceparent,
+  getTraceId,
   middleware,
   logger as buildLogger
 } from "@bonniernews/logger";
@@ -43,6 +43,28 @@ Use the `getTraceparent` function to pass tracing headers to downstream services
 Use `getTraceId` if you only want to know the current trace-id.
 
 If you want to decorate logs with custom data, use the exported `decorateLogs` function. In order to use this, the middleware needs to be installed first.
+
+### attachTraceHandler
+If you have a separate script or function, without using an express middleware, where you want to use the logging lib you can use attachTraceHandler
+
+Example
+
+```js
+import {
+  getTraceId,
+} from "@bonniernews/logger";
+
+    const g = () => new Promise((resolve) => resolve(getTraceId()));
+    const f = async function () {
+        const output = [];
+        output.push(getTraceId());
+        const a = await g();
+        output.push(a);
+        return output;
+    };
+
+    const result = await attachTraceHandler(f);
+```
 
 ## Interface
 

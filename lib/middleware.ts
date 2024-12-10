@@ -59,6 +59,41 @@ export const middleware: Middleware = () => {
   };
 };
 
+export function attachTraceHandler(f, traceparent = undefined) {
+  let initialized = false;
+  let projectId: string | undefined;
+  return new Promise(async (resolve, reject) => {
+    if (!initialized) {
+      initialized = true;
+      projectId = await getGcpProjectId();
+    }
+    traceparent = traceparent || createTraceparent();
+    const trace = getTraceFromTraceparent(traceparent);
+    const logFields: LogFields = {};
+
+    if (trace) {
+      logFields.traceId = trace.traceId;
+      logFields.spanId = trace.parentId;
+
+      if (projectId) {
+        logFields["logging.googleapis.com/trace"] = `projects/${projectId}/traces/${trace.traceId}`;
+        logFields["logging.googleapis.com/spanId"] = trace.parentId;
+        logFields["logging.googleapis.com/trace_sampled"] = trace.isSampled;
+      }
+    }
+
+    storage.run({ traceparent, logFields }, async () => {
+      try {
+        const res = await f();
+        resolve(res);
+      } catch (error) {
+        reject(error);
+      }
+    });
+  });
+
+}
+
 export function getStore(): Store | undefined {
   return storage.getStore();
 }

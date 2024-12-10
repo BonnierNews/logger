@@ -3,7 +3,7 @@ import gcpMetaData from "gcp-metadata";
 import { createSandbox } from "sinon";
 
 import { logger as buildLogger, decorateLogs, getLoggingData, Logger } from "../../lib/logging";
-import { middleware as createMiddleware } from "../../lib/middleware";
+import { middleware as createMiddleware, attachTraceHandler } from "../../lib/middleware";
 
 const logs: Record<string, unknown>[] = [];
 const stream = { write: (data: string) => logs.push(JSON.parse(data)) };
@@ -50,6 +50,31 @@ Feature("Logging with tracing", () => {
       });
     });
   });
+
+    Scenario("Logging in the attachTraceHandler context", () => {
+      Given("we can fetch the GCP project ID from the metadata server", () => {
+        sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
+        sandbox.stub(gcpMetaData, "project").resolves("test-project");
+      });
+
+      When("logging in the middleware context", async () => {
+        await attachTraceHandler(() => {
+          logger.info("test");
+        }, traceparent);
+      });
+
+      Then("trace data should be logged", () => {
+        expect(logs.length).to.equal(1);
+        expect(logs[0]).to.deep.include({
+          message: "test",
+          traceId,
+          spanId,
+          "logging.googleapis.com/trace": `projects/test-project/traces/${traceId}`,
+          "logging.googleapis.com/spanId": spanId,
+          "logging.googleapis.com/trace_sampled": true,
+        });
+      });
+    });
 
   Scenario("Logging in the middleware context, but without traceparent header", () => {
     Given("we can fetch the GCP project ID from the metadata server", () => {
