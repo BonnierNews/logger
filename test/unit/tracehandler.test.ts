@@ -112,5 +112,4 @@ Feature("Logging with tracing", () => {
   //       expect(await attachTraceHandler(f)).to.throw();
   //     });
   //   });
-
 });
