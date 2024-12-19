@@ -1,6 +1,7 @@
 import type { RequestHandler } from "express";
 import gcpMetaData from "gcp-metadata";
 import { createSandbox } from "sinon";
+import fs from "fs";
 
 import { logger as buildLogger, decorateLogs, getLoggingData, Logger } from "../../lib/logging";
 import { middleware as createMiddleware } from "../../lib/middleware";
@@ -30,6 +31,37 @@ Feature("Logging with tracing", () => {
       sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
       sandbox.stub(gcpMetaData, "project").resolves("test-project");
     });
+
+    When("logging in the middleware context", async () => {
+      // @ts-expect-error - We don't need the full Express Request object
+      await middleware({ header: () => traceparent }, {}, () => {
+        logger.info("test");
+      });
+    });
+
+    Then("trace data should be logged", () => {
+      expect(logs.length).to.equal(1);
+      expect(logs[0]).to.deep.include({
+        message: "test",
+        traceId,
+        spanId,
+        "logging.googleapis.com/trace": `projects/test-project/traces/${traceId}`,
+        "logging.googleapis.com/spanId": spanId,
+        "logging.googleapis.com/trace_sampled": true,
+      });
+    });
+  });
+
+  Scenario("Logging in the middleware context, without environment provided", () => {
+    Given("we can fetch the GCP project ID from the metadata server", () => {
+      sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
+      sandbox.stub(gcpMetaData, "project").resolves("test-project");
+    });
+
+    And("there is no environment provided", () => {
+      process.env.NODE_ENV = "";
+    });
+
 
     When("logging in the middleware context", async () => {
       // @ts-expect-error - We don't need the full Express Request object
@@ -329,6 +361,34 @@ Feature("Decorating logs", () => {
       expect(logs[1]).to.deep.include({ message: "No context" });
       expect(logs[1]).to.not.have.any.keys([ "one", "two" ]);
       expect(decoratedFields[1]).to.deep.equal({});
+    });
+  });
+});
+
+Feature("Local logging", () => {
+  let middleware: RequestHandler = createMiddleware();
+
+  afterEachScenario(() => {
+    // logs.length = 0;
+    sandbox.restore();
+    middleware = createMiddleware();
+  });
+
+  Scenario("Local logs get saved in a log file", () => {
+    let localLogger: Logger;
+    Given("a logger", () => {
+      localLogger = buildLogger();
+    });
+
+    When("logging", () => {
+      localLogger.info("test");
+    });
+
+    Then("the log should be saved in a log file", () => {
+      setTimeout(() => {
+        const data = fs.readFileSync("./logs/test.log", "utf8");
+        expect(data).to.include("INFO: test");
+      }, 100);
     });
   });
 });
