@@ -4,6 +4,7 @@ import pino, {
   Logger as PinoLogger,
   LoggerOptions as PinoOptions,
 } from "pino";
+import fs from "fs";
 
 import { getStore } from "./middleware";
 
@@ -47,6 +48,7 @@ export function logger(options: LoggerOptions = {}, stream?: DestinationStream |
   const shouldPrettyPrint = [ "development", "test", "dev" ].includes(env) && !stream;
 
   const logLocation = env === "test" && "./logs/test.log";
+  if (logLocation) fs.writeFileSync(logLocation, "", { flag: "w" });
 
   const {
     logLevel = "info",
