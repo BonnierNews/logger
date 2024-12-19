@@ -53,13 +53,17 @@ Feature("Logging with tracing", () => {
   });
 
   Scenario("Logging in the middleware context, without environment provided", () => {
-    Given("we can fetch the GCP project ID from the metadata server", () => {
-      sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
-      sandbox.stub(gcpMetaData, "project").resolves("test-project");
+    Given("there is no environment provided", () => {
+      process.env.NODE_ENV = "";
     });
 
-    And("there is no environment provided", () => {
-      process.env.NODE_ENV = "";
+    Then("the environment should default to development", () => {
+      //
+    });
+
+    And("we can fetch the GCP project ID from the metadata server", () => {
+      sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
+      sandbox.stub(gcpMetaData, "project").resolves("test-project");
     });
 
     When("logging in the middleware context", async () => {
