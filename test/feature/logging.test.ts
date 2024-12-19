@@ -62,7 +62,6 @@ Feature("Logging with tracing", () => {
       process.env.NODE_ENV = "";
     });
 
-
     When("logging in the middleware context", async () => {
       // @ts-expect-error - We don't need the full Express Request object
       await middleware({ header: () => traceparent }, {}, () => {
@@ -366,12 +365,9 @@ Feature("Decorating logs", () => {
 });
 
 Feature("Local logging", () => {
-  let middleware: RequestHandler = createMiddleware();
-
   afterEachScenario(() => {
-    // logs.length = 0;
+    logs.length = 0;
     sandbox.restore();
-    middleware = createMiddleware();
   });
 
   Scenario("Local logs get saved in a log file", () => {
