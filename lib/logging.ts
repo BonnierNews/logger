@@ -44,11 +44,10 @@ export type DestinationStream = PinoDestinationStream;
  * Creates a pino logger that is pre-configured and ready to be used with minimal setup.
  */
 export function logger(options: LoggerOptions = {}, stream?: DestinationStream | undefined): Logger {
-  const env = process.env.NODE_ENV || "development";
-  const shouldPrettyPrint = [ "development", "test", "dev" ].includes(env) && !stream;
-
-  const logLocation = env === "test" && "./logs/test.log";
-  if (logLocation) fs.writeFileSync(logLocation, "", { flag: "w" });
+  const isDevelopmentEnvironment = [ "development", "test", "dev" ].includes(process.env.NODE_ENV || "development");
+  const shouldPrettyPrint = isDevelopmentEnvironment && !stream;
+  const logLocation = isDevelopmentEnvironment && "./logs/test.log";
+  if (logLocation && fs.existsSync(logLocation)) fs.writeFileSync(logLocation, "", { flag: "w" });
 
   const {
     logLevel = "info",
