@@ -22,23 +22,16 @@ export type Middleware = () => RequestHandler;
 
 const storage = new AsyncLocalStorage<Store>();
 
-/**
- * Express middleware to be used to automatically decorate all logs with trace information.
- *
- * Only logs that occur inside the request context will be decorated, and applications running
- * in GCP will get the appropriate log fields to show up correctly in the GCP Trace Explorer.
- */
-export const middleware: Middleware = () => {
-  let initialized = false;
+export function attachTraceHandler(f: () => any, traceparent?: string) {
   let projectId: string | undefined;
-
-  return async (req, _res, next) => {
+  let initialized = false;
+  // eslint-disable-next-line no-async-promise-executor
+  return new Promise(async (resolve, reject) => {
     if (!initialized) {
       initialized = true;
       projectId = await getGcpProjectId();
     }
-
-    const traceparent = req.header("traceparent") || createTraceparent();
+    traceparent = traceparent || createTraceparent();
     const trace = getTraceFromTraceparent(traceparent);
     const logFields: LogFields = {};
 
@@ -53,9 +46,27 @@ export const middleware: Middleware = () => {
       }
     }
 
-    storage.run({ traceparent, logFields }, () => {
-      next();
+    storage.run({ traceparent, logFields }, async () => {
+      try {
+        const res = await f();
+        resolve(res);
+      } catch (error) {
+        reject(error);
+      }
     });
+  });
+}
+
+/**
+ * Express middleware to be used to automatically decorate all logs with trace information.
+ *
+ * Only logs that occur inside the request context will be decorated, and applications running
+ * in GCP will get the appropriate log fields to show up correctly in the GCP Trace Explorer.
+ */
+export const middleware: Middleware = () => {
+  return async (req, _res, next) => {
+    const traceparent = req.header("traceparent");
+    await attachTraceHandler(next, traceparent);
   };
 };
 
