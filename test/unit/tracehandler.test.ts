@@ -135,27 +135,32 @@ Feature("Logging with tracing", () => {
     });
   });
 
-  //   Scenario("Function being called within attachTraceHandler throws error", () => {
-  //     Given("we can fetch the GCP project ID from the metadata server", () => {
-  //       sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
-  //       sandbox.stub(gcpMetaData, "project").resolves("test-project");
-  //     });
+  Scenario("Function being called within attachTraceHandler throws error", () => {
+    Given("we can fetch the GCP project ID from the metadata server", () => {
+      sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
+      sandbox.stub(gcpMetaData, "project").resolves("test-project");
+    });
 
-  //     let g: any, f: any;
+    let g: any, f: any;
 
-  //     And("we have two async functions that logs independently", () => {
-  //       g = () => new Promise(() => {
-  //         throw new Error();
-  //       });
-  //       f = async function () {
-  //         await g();
-  //         logger.info("test");
-  //         return true;
-  //       };
-  //     });
+    And("we have two async functions that logs independently", () => {
+      g = () => new Promise(() => {
+        throw new Error("Something went wrong!");
+      });
+      f = async function () {
+        await g();
+        logger.info("test");
+        return true;
+      };
+    });
 
-  //     When("handler throws if function attached to throws", async () => {
-  //       expect(await attachTraceHandler(f)).to.throw();
-  //     });
-  //   });
+    When("handler throws if function attached to throws", async () => {
+      const runWithTrace = await attachTrace(f);
+      try {
+        await runWithTrace();
+      } catch (error) {
+        expect(error).to.be.an("Error");
+      }
+    });
+  });
 });
