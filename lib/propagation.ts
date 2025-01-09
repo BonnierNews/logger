@@ -1,4 +1,4 @@
-import { getStore } from "./middleware";
+import { getStore } from "./attach-trace";
 import { getTraceFromTraceparent } from "./traceparent";
 
 /**

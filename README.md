@@ -44,33 +44,13 @@ Use `getTraceId` if you only want to know the current trace-id.
 
 If you want to decorate logs with custom data, use the exported `decorateLogs` function. In order to use this, the middleware needs to be installed first.
 
-### attachTraceHandler
-
-If you have a separate script or function, without using an express middleware, where you want to use the logging lib you can use attachTraceHandler
-
-Example
-
-```js
-import { getTraceId } from "@bonniernews/logger";
-
-const g = () => new Promise((resolve) => resolve(getTraceId()));
-const f = async function () {
-  const output = [];
-  output.push(getTraceId());
-  const a = await g();
-  output.push(a);
-  return output;
-};
-
-const result = await attachTraceHandler(f);
-```
-
 ## Interface
 
 The library have these named exports:
 
 - `logger`: Used to create a logger, see [below](#logger).
 - `middleware`: A middleware to install a request context store that is used to decorate logs with automatic tracing. This middleware enables the use of `decorateLogs`, `getLoggingData`, `getTraceparent` and `getTraceId`.
+- `attachTrace: If you have a separate script or function, without using an express middleware, where you want to use the logging lib you can use attachTrace.
 - `decorateLogs`: Function to add data to the request context.
 - `getLoggingData`: Returns decorated data fields together with trace information.
 - `getTraceparent`: Returns traceparent header value - to be used for requests to downstream services.
@@ -123,6 +103,27 @@ log.warn(error);
 
 // The `err` key is special, and triggers error serialization:
 log.error({ err: error }, "This message takes precedence over err.message");
+```
+
+### attachTrace
+
+Example
+
+```js
+import { attachTrace } from "@bonniernews/logger";
+
+const getTrace = () => new Promise((resolve) => resolve(getTraceId()));
+const runScript = async function (param1, param2) {
+  const output = [param1, param2];
+  output.push(getTraceId());
+  const trace = await getTrace(); // The trace is available since this is invoked from a trace context.
+  output.push(trace);
+  return output;
+};
+
+const runWithTrace = await attachTrace(runScript);
+const res1 = await runWithTrace(1, 2); // Will execute runScript with parameters 1, 2
+const res2 = await runWithTrace(3, 4); // Will execute runScript with parameters 3, 4
 ```
 
 #### Tracing

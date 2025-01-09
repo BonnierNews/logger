@@ -2,7 +2,7 @@ import gcpMetaData from "gcp-metadata";
 import { createSandbox } from "sinon";
 
 import { logger as buildLogger } from "../../lib/logging";
-import { attachTraceHandler } from "../../lib/middleware";
+import { attachTrace } from "../../lib/attach-trace";
 
 const logs: Record<string, unknown>[] = [];
 const stream = { write: (data: string) => logs.push(JSON.parse(data)) };
@@ -21,22 +21,23 @@ Feature("Logging with tracing", () => {
     sandbox.restore();
   });
 
-  Scenario("Logging in the attachTraceHandler context", () => {
+  Scenario("Logging in the attachTrace context", () => {
     Given("we can fetch the GCP project ID from the metadata server", () => {
       sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
       sandbox.stub(gcpMetaData, "project").resolves("test-project");
     });
 
     When("logging in the executed function context", async () => {
-      await attachTraceHandler(() => {
-        logger.info("test");
+      const runWithTrace = await attachTrace((param) => {
+        logger.info(`test ${param}`);
       }, traceparent);
+      await runWithTrace(1);
     });
 
     Then("trace data should be logged", () => {
       expect(logs.length).to.equal(1);
       expect(logs[0]).to.deep.include({
-        message: "test",
+        message: "test 1",
         traceId,
         spanId,
         "logging.googleapis.com/trace": `projects/test-project/traces/${traceId}`,
@@ -46,7 +47,7 @@ Feature("Logging with tracing", () => {
     });
   });
 
-  Scenario("Logging in the attachTraceHandler async context", () => {
+  Scenario("Logging in the attachTrace async context", () => {
     Given("we can fetch the GCP project ID from the metadata server", () => {
       sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
       sandbox.stub(gcpMetaData, "project").resolves("test-project");
@@ -64,7 +65,8 @@ Feature("Logging with tracing", () => {
     });
 
     When("logging in the executed function context", async () => {
-      await attachTraceHandler(f, traceparent);
+      const runWithTrace = await attachTrace(f, traceparent);
+      await runWithTrace();
     });
 
     Then("we should have two logs with same traceId", () => {
@@ -80,6 +82,50 @@ Feature("Logging with tracing", () => {
 
       expect(logs[1]).to.deep.include({
         message: "test2",
+        traceId,
+        spanId,
+        "logging.googleapis.com/trace": `projects/test-project/traces/${traceId}`,
+        "logging.googleapis.com/spanId": spanId,
+        "logging.googleapis.com/trace_sampled": true,
+      });
+    });
+  });
+
+  Scenario("attackTrace to a function and run multiple times with different parameters", () => {
+    Given("we can fetch the GCP project ID from the metadata server", () => {
+      sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
+      sandbox.stub(gcpMetaData, "project").resolves("test-project");
+    });
+
+    When("logging in the executed function context", async () => {
+      const runWithTrace = await attachTrace((param) => {
+        logger.info(`test ${param}`);
+      }, traceparent);
+      await runWithTrace(1);
+      await runWithTrace(2);
+      await runWithTrace(3);
+    });
+
+    Then("trace data should be logged", () => {
+      expect(logs.length).to.equal(3);
+      expect(logs[0]).to.deep.include({
+        message: "test 1",
+        traceId,
+        spanId,
+        "logging.googleapis.com/trace": `projects/test-project/traces/${traceId}`,
+        "logging.googleapis.com/spanId": spanId,
+        "logging.googleapis.com/trace_sampled": true,
+      });
+      expect(logs[1]).to.deep.include({
+        message: "test 2",
+        traceId,
+        spanId,
+        "logging.googleapis.com/trace": `projects/test-project/traces/${traceId}`,
+        "logging.googleapis.com/spanId": spanId,
+        "logging.googleapis.com/trace_sampled": true,
+      });
+      expect(logs[2]).to.deep.include({
+        message: "test 3",
         traceId,
         spanId,
         "logging.googleapis.com/trace": `projects/test-project/traces/${traceId}`,

@@ -1,5 +1,13 @@
 import crypto from "crypto";
 
+export type Trace =
+  | {
+      traceId: string;
+      parentId: string;
+      isSampled: boolean;
+    }
+  | undefined;
+
 /**
  * Traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-00
  *
@@ -13,7 +21,7 @@ function traceIsSampled(traceFlags: string) {
   return (parseInt(traceFlags, 16) & FLAG_SAMPLED) === FLAG_SAMPLED;
 }
 
-export function getTraceFromTraceparent(traceHeader: string) {
+export function getTraceFromTraceparent(traceHeader: string): Trace {
   const parts = traceHeader.split("-");
 
   if (!parts || parts.length !== 4) return;
