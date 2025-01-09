@@ -1,5 +1,3 @@
-import gcpMetaData from "gcp-metadata";
-
 /**
  * Fetches the Google Cloud Platform (GCP) project ID from the GCP metadata server.
  *
@@ -9,7 +7,7 @@ export async function getGcpProjectId(): Promise<string | undefined> {
   if (process.env.GCP_PROJECT) {
     return process.env.GCP_PROJECT;
   }
-
+  const gcpMetaData = await import("gcp-metadata");
   const isAvailable = await gcpMetaData.isAvailable();
   if (!isAvailable) return;
 
