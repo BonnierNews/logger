@@ -28,7 +28,7 @@ export async function attachTrace<T extends(...args: any) => any>(fn: T, tracepa
   const trace = getTraceFromTraceparent(traceparent);
   const logFields = getLogFieldsFromTrace(trace, projectId);
 
-  return (...args: any): any => {
+  return (...args: Parameters<T>): ReturnType<T> => {
     return storage.run({ traceparent, logFields }, fn, ...args);
   };
 }
