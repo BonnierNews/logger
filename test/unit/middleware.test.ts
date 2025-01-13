@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
 
 import { middleware as createMiddleware } from "../../lib/middleware";
-import { getStore, Store } from "../../lib/attach-trace";
+import { getStore, type Store } from "../../lib/storage";
 
 describe("Express middleware", () => {
   let middleware: RequestHandler;

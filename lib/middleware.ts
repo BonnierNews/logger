@@ -1,6 +1,8 @@
 import type { RequestHandler } from "express";
 
-import { attachTrace } from "./attach-trace";
+import { getGcpProjectId } from "./gcp";
+import { getTraceFromTraceparent, createTraceparent } from "./traceparent";
+import { getLogFieldsFromTrace, storage } from "./storage";
 
 export type Middleware = () => RequestHandler;
 
@@ -11,9 +13,21 @@ export type Middleware = () => RequestHandler;
  * in GCP will get the appropriate log fields to show up correctly in the GCP Trace Explorer.
  */
 export const middleware: Middleware = () => {
+  let initialized = false;
+  let projectId: string | undefined;
+
   return async (req, _res, next) => {
-    const traceparent = req.header("traceparent");
-    const runWithTrace = await attachTrace(next, traceparent);
-    await runWithTrace();
+    if (!initialized) {
+      initialized = true;
+      projectId = await getGcpProjectId();
+    }
+
+    const traceparent = req.header("traceparent") || createTraceparent();
+    const trace = getTraceFromTraceparent(traceparent);
+    const logFields = getLogFieldsFromTrace(trace, projectId);
+
+    storage.run({ traceparent, logFields }, () => {
+      next();
+    });
   };
 };

@@ -50,7 +50,7 @@ The library have these named exports:
 
 - `logger`: Used to create a logger, see [below](#logger).
 - `middleware`: A middleware to install a request context store that is used to decorate logs with automatic tracing. This middleware enables the use of `decorateLogs`, `getLoggingData`, `getTraceparent` and `getTraceId`.
-- `attachTrace: If you have a separate script or function, without using an express middleware, where you want to use the logging lib you can use attachTrace.
+- `attachTrace`: If you have a separate script or function, without using an express middleware, where you want to use the logging lib you can use attachTrace.
 - `decorateLogs`: Function to add data to the request context.
 - `getLoggingData`: Returns decorated data fields together with trace information.
 - `getTraceparent`: Returns traceparent header value - to be used for requests to downstream services.

@@ -1,4 +1,4 @@
-import { getStore } from "./attach-trace";
+import { getStore } from "./storage";
 import { getTraceFromTraceparent } from "./traceparent";
 
 /**

@@ -144,9 +144,10 @@ Feature("Logging with tracing", () => {
     let g: any, f: any;
 
     And("we have two async functions that logs independently", () => {
-      g = () => new Promise(() => {
-        throw new Error("Something went wrong!");
-      });
+      g = () =>
+        new Promise((_, reject) => {
+          reject(new Error("Something went wrong!"));
+        });
       f = async function () {
         await g();
         logger.info("test");
