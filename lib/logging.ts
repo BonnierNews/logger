@@ -5,7 +5,7 @@ import pino, {
   LoggerOptions as PinoOptions,
 } from "pino";
 
-import { getStore } from "./middleware";
+import { getStore } from "./storage";
 
 /**
  * Get the decorated log fields.
