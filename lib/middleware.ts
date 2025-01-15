@@ -1,10 +1,12 @@
 import type { RequestHandler } from "express";
+import { NextRequest, NextResponse } from "next/server";
 
 import { getGcpProjectId } from "./gcp";
 import { getTraceFromTraceparent, createTraceparent } from "./traceparent";
 import { getLogFieldsFromTrace, storage } from "./storage";
 
 export type Middleware = () => RequestHandler;
+export type NextMiddleware = () => (request: NextRequest) => NextResponse;
 
 /**
  * Express middleware to be used to automatically decorate all logs with trace information.
@@ -29,5 +31,26 @@ export const middleware: Middleware = () => {
     storage.run({ traceparent, logFields }, () => {
       next();
     });
+  };
+};
+
+export const nextMiddleware: NextMiddleware = () => {
+  let initialized = false;
+  let projectId: string | undefined;
+
+  return async (request: NextRequest) => {
+    if (!initialized) {
+      initialized = true;
+      projectId = await getGcpProjectId();
+    }
+
+    const requestHeaders = new Headers(request.headers);
+
+    const traceparent = requestHeaders.get("traceparent") || createTraceparent();
+    const trace = getTraceFromTraceparent(traceparent);
+    const logFields = getLogFieldsFromTrace(trace, projectId);
+
+    storage.run({ traceparent, logFields }, () => {});
+    return NextResponse.next();
   };
 };
