@@ -1,13 +1,13 @@
 import type { RequestHandler } from "express";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest } from "next/server.js";
 
 import { getGcpProjectId } from "./gcp";
 import { getTraceFromTraceparent, createTraceparent } from "./traceparent";
 import { getLogFieldsFromTrace, storage } from "./storage";
 
 export type Middleware = () => RequestHandler;
-export type NextRequestHandler = (request: NextRequest, next: any) => Promise<NextResponse>;
-export type NextMiddleware = () => NextRequestHandler;
+export type NextMiddleware = () => void;
+
 /**
  * Express middleware to be used to automatically decorate all logs with trace information.
  *
@@ -39,26 +39,21 @@ export const nextMiddleware: NextMiddleware = () => {
   let projectId: string | undefined;
   console.log("hej 1"); // eslint-disable-line
 
-  return async (request: NextRequest, next) => {
+  return async (req: NextRequest) => {
     if (!initialized) {
-      initialized = true;
       console.log("hej 2"); // eslint-disable-line
+      initialized = true;
       projectId = await getGcpProjectId();
     }
 
     console.log("hej 3"); // eslint-disable-line
-    const requestHeaders = new Headers(request.headers);
+    const requestHeaders = new Headers(req.headers);
 
     const traceparent = requestHeaders.get("traceparent") || createTraceparent();
-
-    console.log(requestHeaders.get("traceparent")); // eslint-disable-line
-
     const trace = getTraceFromTraceparent(traceparent);
     const logFields = getLogFieldsFromTrace(trace, projectId);
 
-    storage.run({ traceparent, logFields }, () => {
-      next();
-    });
-    return NextResponse.next();
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
+    storage.run({ traceparent, logFields }, () => { });
   };
 };
