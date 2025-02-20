@@ -13,7 +13,7 @@ chai.config.includeStack = true;
 
 // nock.enableNetConnect(/(localhost|127\.0\.0\.1):\d+/);
 
-(global as any).expect = chai.expect; // eslint-disable-line @typescript-eslint/no-explicit-any
+(global as any).expect = chai.expect;
 
 declare global {
   const expect: Chai.ExpectStatic;
