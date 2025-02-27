@@ -53,7 +53,7 @@
     "pino-pretty": "^13.0.0"
   },
   "devDependencies": {
-    "@bonniernews/eslint-config": "^1.2.0",
+    "@bonniernews/eslint-config": "^2.0.0",
     "@bonniernews/tsconfig": "^0.0.2",
     "@types/chai": "^5.0.0",
     "@types/express": "^5.0.0",
