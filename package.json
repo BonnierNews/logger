@@ -36,7 +36,6 @@
     "coverage": "c8 npm test && c8 check-coverage",
     "local-coverage": "c8 --reporter html npm test && c8 check-coverage || open ./coverage/index.html",
     "prepublishOnly": "npm run build",
-    "postpublish": "npm run publish-internal",
     "publish-internal": "npm publish --access public --ignore-scripts --@bonniernews:registry='https://npm.pkg.github.com'"
   },
   "author": "Bonnier News",

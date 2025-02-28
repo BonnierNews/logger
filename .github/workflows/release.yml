@@ -47,12 +47,6 @@ jobs:
           gh release create ${{ steps.check_version.outputs.version_tag }} --generate-notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create npmrc for GitHub Package Registry
-        shell: bash
-        env:
-          BN_PACKAGE_TOKEN: ${{ secrets.BN_PACKAGE_REGISTRY_READER }}
-        run: |
-          echo -e "\n//npm.pkg.github.com/:_authToken=${BN_PACKAGE_TOKEN}" >> ./.npmrc
       - name: Publish to NPM
         if: steps.check_version.outputs.version_tag
         run: |
@@ -60,3 +54,9 @@ jobs:
           npm publish --provenance --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to internal NPM registry
+        if: steps.check_version.outputs.version_tag
+        run: |
+          npm run publish-internal
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
