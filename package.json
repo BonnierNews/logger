@@ -32,7 +32,7 @@
     "lint": "eslint . --cache && npm run typecheck",
     "format": "prettier --write . && eslint --fix .",
     "typecheck": "tsc --noEmit",
-    "test": "mocha --exit --reporter ${REPORTER:-spec}",
+    "test": "node --test --test-force-exit --test-reporter ${REPORTER:-spec} --import \"tsx/esm\" --import \"./test/setup.ts\" \"test/**/*.{test,feature}.ts\"",
     "coverage": "c8 npm test && c8 check-coverage",
     "local-coverage": "c8 --reporter html npm test && c8 check-coverage || open ./coverage/index.html",
     "prepublishOnly": "npm run build"
@@ -54,6 +54,7 @@
   },
   "devDependencies": {
     "@bonniernews/eslint-config": "^2.0.2",
+    "@bonniernews/node-test-bdd": "^0.0.3",
     "@bonniernews/tsconfig": "^0.0.2",
     "@types/chai": "^5.0.0",
     "@types/express": "^5.0.0",
@@ -64,8 +65,6 @@
     "chai": "^5.1.1",
     "eslint": "^9.20.1",
     "express": "^4.21.0",
-    "mocha": "^11.0.0",
-    "mocha-cakes-2": "^3.3.0",
     "prettier": "^3.3.3",
     "sinon": "^19.0.2",
     "tsup": "^8.4.0",

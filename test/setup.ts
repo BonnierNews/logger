@@ -1,5 +1,5 @@
 import * as chai from "chai";
-import "mocha-cakes-2";
+import "@bonniernews/node-test-bdd/register-bdd";
 
 // Make sure dates are displayed in the correct timezone
 process.env.TZ = "Europe/Stockholm";
