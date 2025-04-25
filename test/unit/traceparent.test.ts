@@ -1,3 +1,5 @@
+import { describe, it } from "node:test";
+
 import { createTraceparent, getTraceFromTraceparent } from "../../lib/traceparent";
 
 describe("Traceparent parsing", () => {

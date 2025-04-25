@@ -1,3 +1,4 @@
+import { describe, afterEach, it } from "node:test";
 import gcpMetaData from "gcp-metadata";
 import { createSandbox } from "sinon";
 
