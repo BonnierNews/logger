@@ -1,7 +1,7 @@
 import type { RequestHandler } from "express";
-import gcpMetaData from "gcp-metadata";
-import { createSandbox } from "sinon";
+import nock from "nock";
 
+import { GCP_METADATA_URL } from "../../lib/gcp";
 import { logger as buildLogger, decorateLogs, getLoggingData, Logger } from "../../lib/logging";
 import { middleware as createMiddleware } from "../../lib/middleware";
 
@@ -9,8 +9,6 @@ const logs: Record<string, unknown>[] = [];
 const stream = { write: (data: string) => logs.push(JSON.parse(data)) };
 
 const logger = buildLogger({}, stream);
-
-const sandbox = createSandbox();
 
 const traceId = "0af7651916cd43dd8448eb211c80319c";
 const spanId = "b7ad6b7169203331";
@@ -21,14 +19,12 @@ Feature("Logging with tracing", () => {
 
   afterEachScenario(() => {
     logs.length = 0;
-    sandbox.restore();
     middleware = createMiddleware();
   });
 
   Scenario("Logging in the middleware context", () => {
     Given("we can fetch the GCP project ID from the metadata server", () => {
-      sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
-      sandbox.stub(gcpMetaData, "project").resolves("test-project");
+      nock(GCP_METADATA_URL).get("").reply(200, "test-project");
     });
 
     When("logging in the middleware context", async () => {
@@ -53,8 +49,7 @@ Feature("Logging with tracing", () => {
 
   Scenario("Logging in the middleware context, but without traceparent header", () => {
     Given("we can fetch the GCP project ID from the metadata server", () => {
-      sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
-      sandbox.stub(gcpMetaData, "project").resolves("test-project");
+      nock(GCP_METADATA_URL).get("").reply(200, "test-project");
     });
 
     When("logging in the middleware context", async () => {
@@ -79,8 +74,7 @@ Feature("Logging with tracing", () => {
 
   Scenario("Logging in the middleware context, but with invalid traceparent header", () => {
     Given("we can fetch the GCP project ID from the metadata server", () => {
-      sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
-      sandbox.stub(gcpMetaData, "project").resolves("test-project");
+      nock(GCP_METADATA_URL).get("").reply(200, "test-project");
     });
 
     When("logging in the middleware context", async () => {
@@ -123,7 +117,7 @@ Feature("Logging with tracing", () => {
 
   Scenario("Logging in the middleware context, without metadata server", () => {
     Given("we can't fetch the GCP project ID from the metadata server", () => {
-      sandbox.stub(gcpMetaData, "isAvailable").resolves(false);
+      nock(GCP_METADATA_URL).get("").delay(100);
     });
 
     When("logging in the middleware context", async () => {
@@ -185,7 +179,6 @@ Feature("Logging options", () => {
 
   afterEachScenario(() => {
     logs.length = 0;
-    sandbox.restore();
     middleware = createMiddleware();
   });
 
@@ -215,8 +208,7 @@ Feature("Logging options", () => {
     });
 
     And("we can fetch the GCP project ID from the metadata server", () => {
-      sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
-      sandbox.stub(gcpMetaData, "project").resolves("test-project");
+      nock(GCP_METADATA_URL).get("").reply(200, "test-project");
     });
 
     When("logging in the middleware context", async () => {
@@ -267,7 +259,6 @@ Feature("Logging options", () => {
 Feature("Decorating logs", () => {
   afterEachScenario(() => {
     logs.length = 0;
-    sandbox.restore();
   });
 
   Scenario("Decorate logs with improper initialization", () => {

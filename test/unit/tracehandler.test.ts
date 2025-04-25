@@ -1,30 +1,29 @@
-import gcpMetaData from "gcp-metadata";
-import { createSandbox } from "sinon";
+import nock from "nock";
+import { before } from "node:test";
 
-import { logger as buildLogger } from "../../lib/logging";
 import { attachTrace } from "../../lib/attach-trace";
+import { GCP_METADATA_URL } from "../../lib/gcp";
+import { logger as buildLogger } from "../../lib/logging";
 
 const logs: Record<string, unknown>[] = [];
 const stream = { write: (data: string) => logs.push(JSON.parse(data)) };
 
 const logger = buildLogger({}, stream);
 
-const sandbox = createSandbox();
-
 const traceId = "0af7651916cd43dd8448eb211c80319c";
 const spanId = "b7ad6b7169203331";
 const traceparent = `00-${traceId}-${spanId}-01`;
 
 Feature("Logging with tracing", () => {
+  before(nock.disableNetConnect);
+
   afterEachScenario(() => {
     logs.length = 0;
-    sandbox.restore();
   });
 
   Scenario("Logging in the attachTrace context", () => {
     Given("we can fetch the GCP project ID from the metadata server", () => {
-      sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
-      sandbox.stub(gcpMetaData, "project").resolves("test-project");
+      nock(GCP_METADATA_URL).get("").reply(200, "test-project");
     });
 
     When("logging in the executed function context", async () => {
@@ -49,8 +48,7 @@ Feature("Logging with tracing", () => {
 
   Scenario("Logging in the attachTrace async context", () => {
     Given("we can fetch the GCP project ID from the metadata server", () => {
-      sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
-      sandbox.stub(gcpMetaData, "project").resolves("test-project");
+      nock(GCP_METADATA_URL).get("").reply(200, "test-project");
     });
 
     let g: any, f: any;
@@ -93,8 +91,7 @@ Feature("Logging with tracing", () => {
 
   Scenario("attackTrace to a function and run multiple times with different parameters", () => {
     Given("we can fetch the GCP project ID from the metadata server", () => {
-      sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
-      sandbox.stub(gcpMetaData, "project").resolves("test-project");
+      nock(GCP_METADATA_URL).get("").reply(200, "test-project");
     });
 
     When("logging in the executed function context", async () => {
@@ -137,8 +134,7 @@ Feature("Logging with tracing", () => {
 
   Scenario("Function being called within attachTraceHandler throws error", () => {
     Given("we can fetch the GCP project ID from the metadata server", () => {
-      sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
-      sandbox.stub(gcpMetaData, "project").resolves("test-project");
+      nock(GCP_METADATA_URL).get("").reply(200, "test-project");
     });
 
     let g: any, f: any;
