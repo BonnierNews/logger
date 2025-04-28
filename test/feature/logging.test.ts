@@ -175,9 +175,9 @@ Feature("GCP logging severities", () => {
 });
 
 Feature("Logging options", () => {
-  let middleware: RequestHandler = createMiddleware();
+  let middleware: RequestHandler;
 
-  afterEachScenario(() => {
+  beforeEachScenario(() => {
     logs.length = 0;
     middleware = createMiddleware();
   });
