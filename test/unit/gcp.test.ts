@@ -1,25 +1,17 @@
-import { describe, afterEach, it } from "node:test";
-import gcpMetaData from "gcp-metadata";
-import { createSandbox } from "sinon";
+import nock from "nock";
+import { describe, it } from "node:test";
 
-import { getGcpProjectId } from "../../lib/gcp";
-
-const sandbox = createSandbox();
+import { GCP_METADATA_URL, getGcpProjectId } from "../../lib/gcp";
 
 describe("GCP log fields", () => {
-  afterEach(() => {
-    sandbox.restore();
-  });
-
   it("should fetch the GCP project ID if available from the metadata server", async () => {
-    sandbox.stub(gcpMetaData, "isAvailable").resolves(true);
-    sandbox.stub(gcpMetaData, "project").resolves("test-project");
+    nock(GCP_METADATA_URL).get("").reply(200, "test-project");
 
     expect(await getGcpProjectId()).to.equal("test-project");
   });
 
   it("should return `undefined` if the the GCP metadata server is not available", async () => {
-    sandbox.stub(gcpMetaData, "isAvailable").resolves(false);
+    nock(GCP_METADATA_URL).get("").delay(100);
 
     expect(await getGcpProjectId()).to.equal(undefined);
   });
