@@ -7,13 +7,14 @@ on:
 
 name: Create Release
 
+permissions:
+  id-token: write
+  contents: write
+
 jobs:
   build:
     name: Create Release
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: write
     steps:
       - name: Check preconditions
         if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' }}
@@ -41,6 +42,14 @@ jobs:
           cache: npm
           registry-url: "https://registry.npmjs.org"
 
+      - name: Update npm
+        if: steps.check_version.outputs.version_tag
+        run: npm install -g npm@^11.5.1 # We need at least npm 11.5.1 for trusted publishing
+
+      - name: Install dependencies
+        if: steps.check_version.outputs.version_tag
+        run: npm ci
+
       - name: Create GitHub release
         if: steps.check_version.outputs.version_tag
         run: |
@@ -51,7 +60,9 @@ jobs:
       - name: Publish to NPM
         if: steps.check_version.outputs.version_tag
         run: |
-          npm ci
-          npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          if [[ ${{ steps.check_version.outputs.version_tag }} =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            npm publish --access public
+          else
+            # For pre-release versions, use the 'next' tag
+            npm publish --access public --tag next
+          fi
