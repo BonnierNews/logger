@@ -1,24 +1,24 @@
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "package.json"
+  workflow_run:
+    workflows: ["Run tests"]
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
 
 name: Create Release
 
 jobs:
-  test:
-    uses: ./.github/workflows/ci.yml
-
   build:
     name: Create Release
     runs-on: ubuntu-latest
-    needs: test
     permissions:
       id-token: write
       contents: write
     steps:
+      - name: Check preconditions
+        if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' }}
+        run: echo "Tests failed, skipping release creation." && exit 1
+
       - uses: actions/checkout@v4
 
       - name: Fetch tags
