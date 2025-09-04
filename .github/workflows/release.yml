@@ -20,7 +20,7 @@ jobs:
         if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'success' }}
         run: echo "Tests failed, skipping release creation." && exit 1
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Fetch tags
         run: git fetch --prune --unshallow --tags
