@@ -1,6 +1,6 @@
 {
   "name": "@bonniernews/logger",
-  "version": "0.0.13-alpha.1",
+  "version": "0.0.13",
   "description": "Some simple functions to use Trace Context for correlating logs",
   "type": "module",
   "main": "./dist/index.cjs",
