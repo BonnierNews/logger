@@ -12,7 +12,7 @@ export async function getGcpProjectId(): Promise<string | undefined> {
   try {
     const projectId = await fetch(GCP_METADATA_URL, {
       headers: { "Metadata-Flavor": "Google" },
-      signal: AbortSignal.timeout(50), // Metadata server should respond realy fast
+      signal: AbortSignal.timeout(100), // Metadata server should respond realy fast
     }).then((res) => res.text());
     return projectId;
   } catch {
