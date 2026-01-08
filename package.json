@@ -58,7 +58,7 @@
     "@types/chai": "^5.0.0",
     "@types/express": "^5.0.0",
     "@types/mocha": "^10.0.8",
-    "@types/node": "^22.9.0",
+    "@types/node": "^24.0.0",
     "@types/sinon": "^21.0.0",
     "c8": "^10.1.2",
     "chai": "^6.0.0",
