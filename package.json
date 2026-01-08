@@ -54,7 +54,7 @@
   "devDependencies": {
     "@bonniernews/eslint-config": "^2.0.2",
     "@bonniernews/node-test-bdd": "^0.0.4",
-    "@bonniernews/tsconfig": "^0.0.2",
+    "@bonniernews/tsconfig": "^0.0.4",
     "@types/chai": "^5.0.0",
     "@types/express": "^5.0.0",
     "@types/mocha": "^10.0.8",
