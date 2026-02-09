@@ -47,6 +47,41 @@ Feature("Logging with tracing", () => {
     });
   });
 
+  Scenario("Logging in the middleware context - metadata server fails first time", () => {
+    Given("the metadata server fails first time - succeeds the second time", () => {
+      nock(GCP_METADATA_URL).get("").reply(500, undefined);
+      nock(GCP_METADATA_URL).get("").reply(200, "test-project");
+    });
+
+    When("logging in the middleware two times", async () => {
+      // @ts-expect-error - We don't need the full Express Request object
+      await middleware({ header: () => traceparent }, {}, () => {
+        logger.info("test");
+      });
+      // @ts-expect-error - We don't need the full Express Request object
+      await middleware({ header: () => traceparent }, {}, () => {
+        logger.info("test");
+      });
+    });
+
+    Then("trace data should be logged only the second time", () => {
+      expect(logs.length).to.equal(2);
+      expect(logs[0]).to.deep.include({
+        message: "test",
+        traceId,
+        spanId,
+      });
+      expect(logs[1]).to.deep.include({
+        message: "test",
+        traceId,
+        spanId,
+        "logging.googleapis.com/trace": `projects/test-project/traces/${traceId}`,
+        "logging.googleapis.com/spanId": spanId,
+        "logging.googleapis.com/trace_sampled": true,
+      });
+    });
+  });
+
   Scenario("Logging in the middleware context, but without traceparent header", () => {
     Given("we can fetch the GCP project ID from the metadata server", () => {
       nock(GCP_METADATA_URL).get("").reply(200, "test-project");
