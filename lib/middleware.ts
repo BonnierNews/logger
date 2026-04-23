@@ -18,8 +18,8 @@ export const middleware: Middleware = () => {
 
   return async (req, _res, next) => {
     if (!initialized) {
-      initialized = true;
       projectId = await getGcpProjectId();
+      initialized = !!projectId;
     }
 
     const traceparent = req.header("traceparent") || createTraceparent();
