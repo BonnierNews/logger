@@ -35,7 +35,7 @@ jobs:
             echo "version_tag=$version" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@v7
         if: steps.check_version.outputs.version_tag
         with:
           node-version-file: .nvmrc
